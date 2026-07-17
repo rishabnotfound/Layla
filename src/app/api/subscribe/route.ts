@@ -1,8 +1,6 @@
 import { NextResponse } from "next/server";
 import { getDb } from "@/lib/mongo";
 import { normalizeOrigin } from "@/lib/ids";
-import { checkPublicRate, ipFrom } from "@/lib/rate-limit";
-
 export const runtime = "nodejs";
 
 const ENDPOINT_ALLOWLIST = [
@@ -30,9 +28,6 @@ export async function OPTIONS() {
 }
 
 export async function POST(req: Request) {
-  const ok = await checkPublicRate(`sub:${ipFrom(req)}`, 30, 60);
-  if (!ok) return NextResponse.json({ error: "rate_limited" }, { status: 429 });
-
   const body = await req.json().catch(() => ({}));
   const { siteId, origin, subscription } = body ?? {};
 

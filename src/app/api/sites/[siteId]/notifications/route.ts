@@ -7,11 +7,27 @@ import { z } from "zod";
 export const runtime = "nodejs";
 export const maxDuration = 60;
 
+const httpsUrl = z
+  .string()
+  .max(2048)
+  .refine(
+    (v) => {
+      try {
+        const u = new URL(v);
+        return u.protocol === "https:" && !!u.hostname;
+      } catch {
+        return false;
+      }
+    },
+    { message: "must be an https URL" }
+  );
+
 const schema = z.object({
   title: z.string().min(1).max(120),
   body: z.string().min(1).max(400),
-  url: z.string().url().optional().or(z.literal("")),
-  icon: z.string().url().optional().or(z.literal("")),
+  url: httpsUrl.optional().or(z.literal("")),
+  icon: httpsUrl.optional().or(z.literal("")),
+  image: httpsUrl.optional().or(z.literal("")),
 });
 
 export async function POST(req: Request, { params }: { params: { siteId: string } }) {
@@ -32,6 +48,7 @@ export async function POST(req: Request, { params }: { params: { siteId: string 
     body: parsed.data.body,
     url: parsed.data.url || site.origin,
     icon: parsed.data.icon || undefined,
+    image: parsed.data.image || undefined,
   });
 
   let delivered = 0;
@@ -69,6 +86,7 @@ export async function POST(req: Request, { params }: { params: { siteId: string 
     body: parsed.data.body,
     url: parsed.data.url || null,
     icon: parsed.data.icon || null,
+    image: parsed.data.image || null,
     attempted: subs.length,
     delivered,
     sentAt: new Date(),

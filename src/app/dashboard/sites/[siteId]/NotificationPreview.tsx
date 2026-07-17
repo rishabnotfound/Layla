@@ -18,11 +18,13 @@ export default function NotificationPreview({
   title,
   body,
   iconUrl,
+  imageUrl,
   originHost,
 }: {
   title: string;
   body: string;
   iconUrl?: string;
+  imageUrl?: string;
   originHost: string;
 }) {
   const [os, setOs] = useState<OS>("macos");
@@ -83,11 +85,11 @@ export default function NotificationPreview({
               exit={{ opacity: 0, y: -8, scale: 0.98 }}
               transition={{ duration: 0.2, ease: "easeOut" }}
             >
-              {os === "macos" && <MacToast title={title} body={body} iconUrl={iconUrl} originHost={originHost} />}
-              {os === "windows" && <WinToast title={title} body={body} iconUrl={iconUrl} originHost={originHost} />}
-              {os === "android" && <AndroidToast title={title} body={body} iconUrl={iconUrl} originHost={originHost} />}
-              {os === "chrome" && <ChromeToast title={title} body={body} iconUrl={iconUrl} originHost={originHost} />}
-              {os === "brave" && <BraveToast title={title} body={body} iconUrl={iconUrl} originHost={originHost} />}
+              {os === "macos" && <MacToast title={title} body={body} iconUrl={iconUrl} imageUrl={imageUrl} originHost={originHost} />}
+              {os === "windows" && <WinToast title={title} body={body} iconUrl={iconUrl} imageUrl={imageUrl} originHost={originHost} />}
+              {os === "android" && <AndroidToast title={title} body={body} iconUrl={iconUrl} imageUrl={imageUrl} originHost={originHost} />}
+              {os === "chrome" && <ChromeToast title={title} body={body} iconUrl={iconUrl} imageUrl={imageUrl} originHost={originHost} />}
+              {os === "brave" && <BraveToast title={title} body={body} iconUrl={iconUrl} imageUrl={imageUrl} originHost={originHost} />}
             </motion.div>
           </AnimatePresence>
         </div>
@@ -123,16 +125,28 @@ function Icon({ src }: { src?: string }) {
   );
 }
 
+function Poster({ src, rounded = "rounded" }: { src?: string; rounded?: string }) {
+  if (!src) return null;
+  return (
+    <div className={cn("mt-2 overflow-hidden", rounded)}>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={src} alt="" className="aspect-[2/1] w-full object-cover" />
+    </div>
+  );
+}
+
 /* ---------- macOS toast ---------- */
 function MacToast({
   title,
   body,
   iconUrl,
+  imageUrl,
   originHost,
 }: {
   title: string;
   body: string;
   iconUrl?: string;
+  imageUrl?: string;
   originHost: string;
 }) {
   return (
@@ -154,6 +168,11 @@ function MacToast({
           </div>
         </div>
       </div>
+      {imageUrl && (
+        <div className="mt-2 text-[9px] italic text-white/30">
+          Poster shown on Chrome/Android — Safari/macOS ignores it.
+        </div>
+      )}
     </div>
   );
 }
@@ -163,33 +182,38 @@ function WinToast({
   title,
   body,
   iconUrl,
+  imageUrl,
   originHost,
 }: {
   title: string;
   body: string;
   iconUrl?: string;
+  imageUrl?: string;
   originHost: string;
 }) {
   return (
-    <div className="rounded-lg border border-white/10 bg-[rgba(30,30,30,0.9)] p-3 shadow-[0_20px_60px_-10px_rgba(0,0,0,0.7)] backdrop-blur">
-      <div className="mb-2 flex items-center justify-between text-[10px] text-white/50">
-        <span>Google Chrome</span>
-        <div className="flex items-center gap-2">
-          <span>now</span>
-          <span className="rounded p-0.5 hover:bg-white/10">×</span>
-        </div>
-      </div>
-      <div className="flex gap-3">
-        <div className="h-12 w-12 shrink-0 overflow-hidden rounded">
-          <Icon src={iconUrl} />
-        </div>
-        <div className="min-w-0 flex-1">
-          <div className="truncate text-[13px] font-semibold text-white">{title || " "}</div>
-          <div className="mt-0.5 line-clamp-2 text-[12px] leading-snug text-white/80">
-            {body || " "}
+    <div className="overflow-hidden rounded-lg border border-white/10 bg-[rgba(30,30,30,0.9)] shadow-[0_20px_60px_-10px_rgba(0,0,0,0.7)] backdrop-blur">
+      <div className="p-3">
+        <div className="mb-2 flex items-center justify-between text-[10px] text-white/50">
+          <span>Google Chrome</span>
+          <div className="flex items-center gap-2">
+            <span>now</span>
+            <span className="rounded p-0.5 hover:bg-white/10">×</span>
           </div>
-          <div className="mt-1 text-[10px] text-white/40">via {originHost}</div>
         </div>
+        <div className="flex gap-3">
+          <div className="h-12 w-12 shrink-0 overflow-hidden rounded">
+            <Icon src={iconUrl} />
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="truncate text-[13px] font-semibold text-white">{title || " "}</div>
+            <div className="mt-0.5 line-clamp-2 text-[12px] leading-snug text-white/80">
+              {body || " "}
+            </div>
+            <div className="mt-1 text-[10px] text-white/40">via {originHost}</div>
+          </div>
+        </div>
+        <Poster src={imageUrl} rounded="rounded-md" />
       </div>
     </div>
   );
@@ -200,11 +224,13 @@ function AndroidToast({
   title,
   body,
   iconUrl,
+  imageUrl,
   originHost,
 }: {
   title: string;
   body: string;
   iconUrl?: string;
+  imageUrl?: string;
   originHost: string;
 }) {
   return (
@@ -230,6 +256,7 @@ function AndroidToast({
           <Icon src={iconUrl} />
         </div>
       </div>
+      <Poster src={imageUrl} rounded="rounded-xl" />
     </div>
   );
 }
@@ -239,11 +266,13 @@ function ChromeToast({
   title,
   body,
   iconUrl,
+  imageUrl,
   originHost,
 }: {
   title: string;
   body: string;
   iconUrl?: string;
+  imageUrl?: string;
   originHost: string;
 }) {
   return (
@@ -258,16 +287,19 @@ function ChromeToast({
         </div>
         <span>×</span>
       </div>
-      <div className="flex gap-3 p-3">
-        <div className="h-12 w-12 shrink-0 overflow-hidden rounded">
-          <Icon src={iconUrl} />
-        </div>
-        <div className="min-w-0 flex-1">
-          <div className="truncate text-[13px] font-semibold text-white">{title || " "}</div>
-          <div className="mt-0.5 line-clamp-2 text-[12px] leading-snug text-white/75">
-            {body || " "}
+      <div className="p-3">
+        <div className="flex gap-3">
+          <div className="h-12 w-12 shrink-0 overflow-hidden rounded">
+            <Icon src={iconUrl} />
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="truncate text-[13px] font-semibold text-white">{title || " "}</div>
+            <div className="mt-0.5 line-clamp-2 text-[12px] leading-snug text-white/75">
+              {body || " "}
+            </div>
           </div>
         </div>
+        <Poster src={imageUrl} rounded="rounded-md" />
       </div>
     </div>
   );
@@ -278,11 +310,13 @@ function BraveToast({
   title,
   body,
   iconUrl,
+  imageUrl,
   originHost,
 }: {
   title: string;
   body: string;
   iconUrl?: string;
+  imageUrl?: string;
   originHost: string;
 }) {
   return (
@@ -294,19 +328,22 @@ function BraveToast({
         </div>
         <span>×</span>
       </div>
-      <div className="flex gap-3 p-3">
-        <div className="h-12 w-12 shrink-0 overflow-hidden rounded">
-          <Icon src={iconUrl} />
-        </div>
-        <div className="min-w-0 flex-1">
-          <div className="truncate text-[13px] font-semibold text-white">{title || " "}</div>
-          <div className="mt-0.5 line-clamp-2 text-[12px] leading-snug text-white/75">
-            {body || " "}
+      <div className="p-3">
+        <div className="flex gap-3">
+          <div className="h-12 w-12 shrink-0 overflow-hidden rounded">
+            <Icon src={iconUrl} />
           </div>
-          <div className="mt-1 text-[10px] text-[#fb542b]/70">
-            Some Brave configs block push — heads up.
+          <div className="min-w-0 flex-1">
+            <div className="truncate text-[13px] font-semibold text-white">{title || " "}</div>
+            <div className="mt-0.5 line-clamp-2 text-[12px] leading-snug text-white/75">
+              {body || " "}
+            </div>
+            <div className="mt-1 text-[10px] text-[#fb542b]/70">
+              Some Brave configs block push — heads up.
+            </div>
           </div>
         </div>
+        <Poster src={imageUrl} rounded="rounded-md" />
       </div>
     </div>
   );

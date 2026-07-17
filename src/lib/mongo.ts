@@ -37,11 +37,6 @@ export function getDb(): Promise<Db> {
             { at: 1 },
             { expireAfterSeconds: 900 }
           ),
-          db.collection("rate_hits").createIndex({ key: 1, at: 1 }),
-          db.collection("rate_hits").createIndex(
-            { at: 1 },
-            { expireAfterSeconds: 3600 }
-          ),
         ]);
         global._mongoIndexed = true;
       }

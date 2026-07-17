@@ -18,6 +18,7 @@ export default function Composer({
   const [body, setBody] = useState("");
   const [url, setUrl] = useState("");
   const [icon, setIcon] = useState("");
+  const [image, setImage] = useState("");
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
 
@@ -40,7 +41,7 @@ export default function Composer({
       const res = await fetch(`/api/sites/${siteId}/notifications`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title, body, url, icon }),
+        body: JSON.stringify({ title, body, url, icon, image }),
       });
       const j = await res.json();
       if (!res.ok) {
@@ -52,6 +53,7 @@ export default function Composer({
       setBody("");
       setUrl("");
       setIcon("");
+      setImage("");
       router.refresh();
     } finally {
       setLoading(false);
@@ -115,6 +117,20 @@ export default function Composer({
             </Field>
           </div>
 
+          <Field
+            label="Poster image URL"
+            optional
+            hint="Chrome/Android only"
+          >
+            <input
+              className="w-full rounded-md border border-white/10 bg-black/40 px-3 py-2 text-sm text-white outline-none transition placeholder:text-white/30 focus:border-white/30"
+              placeholder="https://…/poster.jpg"
+              value={image}
+              onChange={(e) => setImage(e.target.value)}
+              inputMode="url"
+            />
+          </Field>
+
           <div className="flex flex-col-reverse items-stretch gap-3 border-t border-white/[0.06] pt-4 sm:flex-row sm:items-center sm:justify-between">
             {msg ? (
               <span
@@ -151,6 +167,7 @@ export default function Composer({
         title={title || "Your title goes here"}
         body={body || "Your notification body will render exactly like this on the user's device."}
         iconUrl={icon || undefined}
+        imageUrl={image || undefined}
         originHost={originHost}
       />
     </section>

@@ -74,7 +74,6 @@ db.sites.createIndex({ userId: 1 })
 db.subscribers.createIndex({ siteId: 1, endpoint: 1 }, { unique: true })
 db.notifications.createIndex({ siteId: 1, sentAt: -1 })
 db.login_attempts.createIndex({ at: 1 }, { expireAfterSeconds: 900 })
-db.rate_hits.createIndex({ at: 1 }, { expireAfterSeconds: 3600 })
 ```
 
 ## Deploying

@@ -12,22 +12,6 @@ export async function checkLoginRate(ip: string, max = 8): Promise<boolean> {
   return count <= max;
 }
 
-export async function checkPublicRate(
-  key: string,
-  max: number,
-  windowSecs: number
-): Promise<boolean> {
-  const db = await getDb();
-  const col = db.collection("rate_hits");
-  const now = new Date();
-  await col.insertOne({ key, at: now });
-  const count = await col.countDocuments({
-    key,
-    at: { $gt: new Date(Date.now() - windowSecs * 1000) },
-  });
-  return count <= max;
-}
-
 export function ipFrom(req: Request): string {
   const h = req.headers;
   return (

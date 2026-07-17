@@ -5,6 +5,7 @@ self.addEventListener("push", (event) => {
   const opts = {
     body: data.body || "",
     icon: data.icon || undefined,
+    image: data.image || undefined,
     badge: data.badge || undefined,
     data: { url: data.url || "/" },
   };

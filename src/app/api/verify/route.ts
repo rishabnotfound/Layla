@@ -1,8 +1,6 @@
 import { NextResponse } from "next/server";
 import { getDb } from "@/lib/mongo";
 import { normalizeOrigin } from "@/lib/ids";
-import { checkPublicRate, ipFrom } from "@/lib/rate-limit";
-
 export const runtime = "nodejs";
 
 export async function OPTIONS() {
@@ -17,9 +15,6 @@ export async function OPTIONS() {
 }
 
 export async function POST(req: Request) {
-  const ok = await checkPublicRate(`ver:${ipFrom(req)}`, 30, 60);
-  if (!ok) return json({ error: "rate_limited" }, 429);
-
   const body = await req.json().catch(() => ({}));
   const { siteId, origin } = body ?? {};
   if (typeof siteId !== "string" || !siteId) return json({ error: "bad" }, 400);
