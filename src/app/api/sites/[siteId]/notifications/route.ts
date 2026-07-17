@@ -22,12 +22,18 @@ const httpsUrl = z
     { message: "must be an https URL" }
   );
 
+const actionSchema = z.object({
+  label: z.string().min(1).max(24),
+  url: httpsUrl,
+});
+
 const schema = z.object({
   title: z.string().min(1).max(120),
   body: z.string().min(1).max(400),
   url: httpsUrl.optional().or(z.literal("")),
   icon: httpsUrl.optional().or(z.literal("")),
   image: httpsUrl.optional().or(z.literal("")),
+  actions: z.array(actionSchema).max(2).optional(),
 });
 
 export async function POST(req: Request, { params }: { params: { siteId: string } }) {
@@ -43,12 +49,14 @@ export async function POST(req: Request, { params }: { params: { siteId: string 
 
   const subs = await db.collection("subscribers").find({ siteId: site.siteId }).toArray();
 
+  const actions = (parsed.data.actions || []).filter((a) => a.label && a.url);
   const payload = JSON.stringify({
     title: parsed.data.title,
     body: parsed.data.body,
     url: parsed.data.url || site.origin,
     icon: parsed.data.icon || undefined,
     image: parsed.data.image || undefined,
+    actions: actions.length ? actions : undefined,
   });
 
   let delivered = 0;
@@ -87,6 +95,7 @@ export async function POST(req: Request, { params }: { params: { siteId: string 
     url: parsed.data.url || null,
     icon: parsed.data.icon || null,
     image: parsed.data.image || null,
+    actions: actions.length ? actions : null,
     attempted: subs.length,
     delivered,
     sentAt: new Date(),

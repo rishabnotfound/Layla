@@ -19,6 +19,7 @@ export default function Composer({
   const [url, setUrl] = useState("");
   const [icon, setIcon] = useState("");
   const [image, setImage] = useState("");
+  const [actions, setActions] = useState<{ label: string; url: string }[]>([]);
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
 
@@ -35,13 +36,20 @@ export default function Composer({
       setMsg({ ok: false, text: "Title and message are required." });
       throw new Error("invalid");
     }
+    const cleanActions = actions
+      .map((a) => ({ label: a.label.trim(), url: a.url.trim() }))
+      .filter((a) => a.label && a.url);
+    if (cleanActions.length !== actions.filter((a) => a.label.trim() || a.url.trim()).length) {
+      setMsg({ ok: false, text: "Each button needs both a label and an https URL." });
+      throw new Error("invalid");
+    }
     setLoading(true);
     setMsg(null);
     try {
       const res = await fetch(`/api/sites/${siteId}/notifications`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title, body, url, icon, image }),
+        body: JSON.stringify({ title, body, url, icon, image, actions: cleanActions }),
       });
       const j = await res.json();
       if (!res.ok) {
@@ -54,6 +62,7 @@ export default function Composer({
       setUrl("");
       setIcon("");
       setImage("");
+      setActions([]);
       router.refresh();
     } finally {
       setLoading(false);
@@ -131,6 +140,60 @@ export default function Composer({
             />
           </Field>
 
+          <div>
+            <div className="mb-1.5 flex items-baseline justify-between">
+              <span className="text-[12px] font-medium text-white/70">
+                Buttons <span className="ml-1 text-white/30">(optional, max 2)</span>
+              </span>
+              <span className="text-[10px] text-white/40">Chrome / Edge / Android</span>
+            </div>
+            <div className="flex flex-col gap-2">
+              {actions.map((a, i) => (
+                <div key={i} className="flex gap-2">
+                  <input
+                    className="w-32 shrink-0 rounded-md border border-white/10 bg-black/40 px-3 py-2 text-sm text-white outline-none transition placeholder:text-white/30 focus:border-white/30"
+                    placeholder="Read now"
+                    maxLength={24}
+                    value={a.label}
+                    onChange={(e) => {
+                      const next = [...actions];
+                      next[i] = { ...next[i], label: e.target.value };
+                      setActions(next);
+                    }}
+                  />
+                  <input
+                    className="min-w-0 flex-1 rounded-md border border-white/10 bg-black/40 px-3 py-2 text-sm text-white outline-none transition placeholder:text-white/30 focus:border-white/30"
+                    placeholder="https://…"
+                    value={a.url}
+                    inputMode="url"
+                    onChange={(e) => {
+                      const next = [...actions];
+                      next[i] = { ...next[i], url: e.target.value };
+                      setActions(next);
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setActions(actions.filter((_, j) => j !== i))}
+                    className="shrink-0 rounded-md border border-white/10 bg-white/[0.03] px-2 text-[12px] text-white/60 transition hover:border-white/25 hover:text-white"
+                    aria-label="Remove button"
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
+              {actions.length < 2 && (
+                <button
+                  type="button"
+                  onClick={() => setActions([...actions, { label: "", url: "" }])}
+                  className="self-start rounded-md border border-dashed border-white/15 px-3 py-1.5 text-[11px] text-white/60 transition hover:border-white/30 hover:text-white"
+                >
+                  + Add button
+                </button>
+              )}
+            </div>
+          </div>
+
           <div className="flex flex-col-reverse items-stretch gap-3 border-t border-white/[0.06] pt-4 sm:flex-row sm:items-center sm:justify-between">
             {msg ? (
               <span
@@ -168,6 +231,7 @@ export default function Composer({
         body={body || "Your notification body will render exactly like this on the user's device."}
         iconUrl={icon || undefined}
         imageUrl={image || undefined}
+        actions={actions.filter((a) => a.label.trim()).map((a) => a.label.trim())}
         originHost={originHost}
       />
     </section>

@@ -19,12 +19,14 @@ export default function NotificationPreview({
   body,
   iconUrl,
   imageUrl,
+  actions,
   originHost,
 }: {
   title: string;
   body: string;
   iconUrl?: string;
   imageUrl?: string;
+  actions?: string[];
   originHost: string;
 }) {
   const [os, setOs] = useState<OS>("macos");
@@ -85,11 +87,11 @@ export default function NotificationPreview({
               exit={{ opacity: 0, y: -8, scale: 0.98 }}
               transition={{ duration: 0.2, ease: "easeOut" }}
             >
-              {os === "macos" && <MacToast title={title} body={body} iconUrl={iconUrl} imageUrl={imageUrl} originHost={originHost} />}
-              {os === "windows" && <WinToast title={title} body={body} iconUrl={iconUrl} imageUrl={imageUrl} originHost={originHost} />}
-              {os === "android" && <AndroidToast title={title} body={body} iconUrl={iconUrl} imageUrl={imageUrl} originHost={originHost} />}
-              {os === "chrome" && <ChromeToast title={title} body={body} iconUrl={iconUrl} imageUrl={imageUrl} originHost={originHost} />}
-              {os === "brave" && <BraveToast title={title} body={body} iconUrl={iconUrl} imageUrl={imageUrl} originHost={originHost} />}
+              {os === "macos" && <MacToast title={title} body={body} iconUrl={iconUrl} imageUrl={imageUrl} actions={actions} originHost={originHost} />}
+              {os === "windows" && <WinToast title={title} body={body} iconUrl={iconUrl} imageUrl={imageUrl} actions={actions} originHost={originHost} />}
+              {os === "android" && <AndroidToast title={title} body={body} iconUrl={iconUrl} imageUrl={imageUrl} actions={actions} originHost={originHost} />}
+              {os === "chrome" && <ChromeToast title={title} body={body} iconUrl={iconUrl} imageUrl={imageUrl} actions={actions} originHost={originHost} />}
+              {os === "brave" && <BraveToast title={title} body={body} iconUrl={iconUrl} imageUrl={imageUrl} actions={actions} originHost={originHost} />}
             </motion.div>
           </AnimatePresence>
         </div>
@@ -135,18 +137,36 @@ function Poster({ src, rounded = "rounded" }: { src?: string; rounded?: string }
   );
 }
 
+function Actions({ items }: { items?: string[] }) {
+  if (!items || items.length === 0) return null;
+  return (
+    <div className="mt-2 flex gap-1.5 border-t border-white/5 pt-2">
+      {items.map((label, i) => (
+        <div
+          key={i}
+          className="flex-1 truncate rounded-md border border-white/10 bg-white/[0.04] px-2 py-1 text-center text-[11px] font-medium text-white/85"
+        >
+          {label}
+        </div>
+      ))}
+    </div>
+  );
+}
+
 /* ---------- macOS toast ---------- */
 function MacToast({
   title,
   body,
   iconUrl,
   imageUrl,
+  actions,
   originHost,
 }: {
   title: string;
   body: string;
   iconUrl?: string;
   imageUrl?: string;
+  actions?: string[];
   originHost: string;
 }) {
   return (
@@ -173,6 +193,11 @@ function MacToast({
           Poster shown on Chrome/Android — Safari/macOS ignores it.
         </div>
       )}
+      {actions && actions.length > 0 && (
+        <div className="mt-1 text-[9px] italic text-white/30">
+          Buttons don&apos;t show on macOS/Safari — Chrome/Edge/Android only.
+        </div>
+      )}
     </div>
   );
 }
@@ -183,12 +208,14 @@ function WinToast({
   body,
   iconUrl,
   imageUrl,
+  actions,
   originHost,
 }: {
   title: string;
   body: string;
   iconUrl?: string;
   imageUrl?: string;
+  actions?: string[];
   originHost: string;
 }) {
   return (
@@ -214,6 +241,7 @@ function WinToast({
           </div>
         </div>
         <Poster src={imageUrl} rounded="rounded-md" />
+        <Actions items={actions} />
       </div>
     </div>
   );
@@ -225,12 +253,14 @@ function AndroidToast({
   body,
   iconUrl,
   imageUrl,
+  actions,
   originHost,
 }: {
   title: string;
   body: string;
   iconUrl?: string;
   imageUrl?: string;
+  actions?: string[];
   originHost: string;
 }) {
   return (
@@ -257,6 +287,7 @@ function AndroidToast({
         </div>
       </div>
       <Poster src={imageUrl} rounded="rounded-xl" />
+      <Actions items={actions} />
     </div>
   );
 }
@@ -267,12 +298,14 @@ function ChromeToast({
   body,
   iconUrl,
   imageUrl,
+  actions,
   originHost,
 }: {
   title: string;
   body: string;
   iconUrl?: string;
   imageUrl?: string;
+  actions?: string[];
   originHost: string;
 }) {
   return (
@@ -300,6 +333,7 @@ function ChromeToast({
           </div>
         </div>
         <Poster src={imageUrl} rounded="rounded-md" />
+        <Actions items={actions} />
       </div>
     </div>
   );
@@ -311,12 +345,14 @@ function BraveToast({
   body,
   iconUrl,
   imageUrl,
+  actions,
   originHost,
 }: {
   title: string;
   body: string;
   iconUrl?: string;
   imageUrl?: string;
+  actions?: string[];
   originHost: string;
 }) {
   return (
@@ -344,6 +380,7 @@ function BraveToast({
           </div>
         </div>
         <Poster src={imageUrl} rounded="rounded-md" />
+        <Actions items={actions} />
       </div>
     </div>
   );
