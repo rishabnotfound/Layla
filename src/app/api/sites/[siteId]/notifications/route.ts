@@ -35,8 +35,8 @@ export async function POST(req: Request, { params }: { params: { siteId: string 
   });
 
   let delivered = 0;
+  let failed = 0;
   const gone: string[] = [];
-  const errors: { endpoint: string; status?: number; message: string }[] = [];
 
   if (!process.env.VAPID_PUBLIC_KEY || !process.env.VAPID_PRIVATE_KEY) {
     return NextResponse.json({ error: "VAPID keys not configured on server" }, { status: 500 });
@@ -52,12 +52,8 @@ export async function POST(req: Request, { params }: { params: { siteId: string 
         );
         delivered++;
       } catch (e: any) {
+        failed++;
         const code = e?.statusCode;
-        errors.push({
-          endpoint: s.endpoint.slice(0, 60) + "…",
-          status: code,
-          message: e?.body || e?.message || String(e),
-        });
         if (code === 404 || code === 410) gone.push(s.endpoint);
       }
     })
@@ -78,5 +74,30 @@ export async function POST(req: Request, { params }: { params: { siteId: string 
     sentAt: new Date(),
   });
 
-  return NextResponse.json({ ok: true, attempted: subs.length, delivered, errors });
+  await db.collection("sites").updateOne(
+    { siteId: site.siteId },
+    {
+      $inc: {
+        sentCount: 1,
+        attemptedTotal: subs.length,
+        deliveredTotal: delivered,
+      },
+    }
+  );
+
+  const HISTORY_LIMIT = 10;
+  const keep = await db
+    .collection("notifications")
+    .find({ siteId: site.siteId }, { projection: { _id: 1 } })
+    .sort({ sentAt: -1 })
+    .limit(HISTORY_LIMIT)
+    .toArray();
+  if (keep.length === HISTORY_LIMIT) {
+    await db.collection("notifications").deleteMany({
+      siteId: site.siteId,
+      _id: { $nin: keep.map((n: any) => n._id) },
+    });
+  }
+
+  return NextResponse.json({ ok: true, attempted: subs.length, delivered, failed });
 }

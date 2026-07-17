@@ -72,12 +72,12 @@ export default function CopyCodeButton() {
 
       {mounted && open &&
         createPortal(
-          <div className="fixed inset-0 z-[60] flex items-end justify-center sm:items-center">
+          <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
             <div
               className="absolute inset-0 bg-black/70 backdrop-blur-sm"
               onClick={() => setOpen(false)}
             />
-            <div className="relative w-full max-w-md overflow-hidden rounded-t-2xl border border-border bg-panel shadow-[0_20px_80px_-10px_rgba(0,0,0,0.9)] sm:rounded-2xl">
+            <div className="relative w-full max-w-md overflow-hidden rounded-2xl border border-border bg-panel shadow-[0_20px_80px_-10px_rgba(0,0,0,0.9)]">
               <span
                 aria-hidden
                 className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-accent/60 to-transparent"

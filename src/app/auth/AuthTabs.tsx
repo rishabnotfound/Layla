@@ -4,6 +4,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { VanishInput } from "@/components/ui/VanishInput";
 import { TosModal } from "@/components/ui/TosModal";
+import { Turnstile } from "@/components/ui/Turnstile";
 
 type Tab = "signin" | "signup";
 
@@ -102,6 +103,7 @@ function SignInForm({ next }: { next: string }) {
   const [code, setCode] = useState("");
   const [err, setErr] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [captcha, setCaptcha] = useState<string | null>(null);
 
   function format(v: string) {
     const d = v.replace(/\D/g, "").slice(0, 16);
@@ -111,16 +113,21 @@ function SignInForm({ next }: { next: string }) {
   async function submit() {
     if (loading) return;
     setErr(null);
+    if (!captcha) {
+      setErr("Please complete the captcha.");
+      return;
+    }
     setLoading(true);
     const res = await fetch("/api/auth/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ code }),
+      body: JSON.stringify({ code, turnstileToken: captcha }),
     });
     setLoading(false);
     if (!res.ok) {
       const j = await res.json().catch(() => ({}));
       setErr(j.error || "Invalid code");
+      setCaptcha(null);
       return;
     }
     router.push(next);
@@ -145,18 +152,22 @@ function SignInForm({ next }: { next: string }) {
         />
       </div>
 
+      <div className="mt-4">
+        <Turnstile onToken={setCaptcha} />
+      </div>
+
       {err && <p className="mt-3 text-sm text-red-400">{err}</p>}
 
       <button
         onClick={submit}
-        disabled={loading || code.replace(/\D/g, "").length !== 16}
+        disabled={loading || code.replace(/\D/g, "").length !== 16 || !captcha}
         className="mt-5 w-full rounded-lg bg-accent px-4 py-3 text-sm font-medium text-white transition hover:bg-accent-hover disabled:opacity-40"
       >
         {loading ? "Checking…" : "Sign in"}
       </button>
 
       <p className="mt-4 text-center text-xs text-muted">
-        Codes never expire. Lost yours? You&apos;ll need a new account.
+        Sessions last 7 days. Codes never expire — save yours.
       </p>
     </div>
   );
@@ -169,18 +180,34 @@ function SignUpForm() {
   const [copied, setCopied] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
   const [tosOpen, setTosOpen] = useState(false);
+  const [captcha, setCaptcha] = useState<string | null>(null);
+  const [err, setErr] = useState<string | null>(null);
 
   async function create() {
     if (loading) return;
+    setErr(null);
     setLoading(true);
-    const res = await fetch("/api/auth/signup", { method: "POST" });
-    const j = await res.json();
+    const res = await fetch("/api/auth/signup", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ turnstileToken: captcha }),
+    });
+    const j = await res.json().catch(() => ({}));
     setLoading(false);
-    if (j.code) setCode(j.code);
+    if (j.code) {
+      setCode(j.code);
+    } else {
+      setErr(j.error || "Failed");
+      setCaptcha(null);
+    }
   }
 
   function requestCreate() {
     if (loading || code) return;
+    if (!captcha) {
+      setErr("Please complete the captcha.");
+      return;
+    }
     setTosOpen(true);
   }
 
@@ -209,13 +236,21 @@ function SignUpForm() {
       </p>
 
       {!code && (
-        <button
-          onClick={requestCreate}
-          disabled={loading}
-          className="mt-6 w-full rounded-lg bg-accent px-4 py-3 text-sm font-medium text-white transition hover:bg-accent-hover disabled:opacity-40"
-        >
-          {loading ? "Generating…" : "Generate my code"}
-        </button>
+        <>
+          <div className="mt-6">
+            <Turnstile onToken={setCaptcha} />
+          </div>
+
+          {err && <p className="mt-3 text-sm text-red-400">{err}</p>}
+
+          <button
+            onClick={requestCreate}
+            disabled={loading || !captcha}
+            className="mt-5 w-full rounded-lg bg-accent px-4 py-3 text-sm font-medium text-white transition hover:bg-accent-hover disabled:opacity-40"
+          >
+            {loading ? "Generating…" : "Generate my code"}
+          </button>
+        </>
       )}
 
       <TosModal open={tosOpen} onAccept={acceptTos} onReject={() => setTosOpen(false)} />

@@ -18,24 +18,19 @@ export default function DeleteSite({ siteId }: { siteId: string }) {
   }
 
   return (
-    <div className="rounded-xl border border-red-950/60 bg-red-950/10 p-4 sm:p-6">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h2 className="text-xs font-semibold uppercase tracking-[0.18em] text-red-400">
-            Danger zone
-          </h2>
-          <p className="mt-1 text-sm text-muted">
-            Deletes this site, its subscribers, and all notification history. No undo.
-          </p>
-        </div>
+    <div className="rounded-xl border border-red-500/20 bg-red-500/[0.03]">
+      <div className="flex flex-col gap-3 border-b border-red-500/10 px-5 py-3 sm:flex-row sm:items-center sm:justify-between">
+        <h2 className="text-sm font-semibold text-white">Danger zone</h2>
+      </div>
+      <div className="flex flex-col gap-4 px-5 py-5 sm:flex-row sm:items-center sm:justify-between">
+        <p className="text-[13px] text-white/60">
+          Deletes this site, its subscribers, and all notification history. This can&apos;t be undone.
+        </p>
         <button
           onClick={del}
           disabled={loading}
-          className="inline-flex items-center justify-center gap-2 rounded-lg border border-red-900/70 bg-black/40 px-4 py-2.5 text-sm font-medium text-red-400 transition hover:border-red-500 hover:bg-red-500/10 hover:text-red-300 disabled:cursor-not-allowed disabled:opacity-40"
+          className="inline-flex shrink-0 items-center justify-center rounded-md border border-red-500/30 bg-red-500/10 px-4 py-2 text-sm font-medium text-red-400 transition hover:border-red-500/50 hover:bg-red-500/15 hover:text-red-300 disabled:cursor-not-allowed disabled:opacity-40"
         >
-          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-4 w-4">
-            <path d="M5 6h10M8 6V4h4v2M6 6l1 10h6l1-10" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
           {loading ? "Deleting…" : "Delete site"}
         </button>
       </div>

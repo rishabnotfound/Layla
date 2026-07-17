@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getDb } from "@/lib/mongo";
 import { hashCode, normalizeCode, createSession, setCodeRecoveryCookie } from "@/lib/auth";
 import { checkLoginRate, ipFrom } from "@/lib/rate-limit";
+import { verifyTurnstile } from "@/lib/turnstile";
 
 export const runtime = "nodejs";
 
@@ -10,8 +11,13 @@ export async function POST(req: Request) {
   const ok = await checkLoginRate(ip);
   if (!ok) return NextResponse.json({ error: "Too many attempts" }, { status: 429 });
 
-  const { code } = await req.json().catch(() => ({}));
-  const digits = normalizeCode(code || "");
+  const body = await req.json().catch(() => ({}));
+  const { code, turnstileToken } = body ?? {};
+
+  const captchaOk = await verifyTurnstile(turnstileToken, ip);
+  if (!captchaOk) return NextResponse.json({ error: "Captcha failed" }, { status: 400 });
+
+  const digits = normalizeCode(typeof code === "string" ? code : "");
   if (digits.length !== 16) return NextResponse.json({ error: "Invalid code" }, { status: 400 });
 
   const db = await getDb();

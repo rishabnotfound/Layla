@@ -45,6 +45,15 @@ export function AddSiteModal({
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setErr(null);
+    try {
+      const parsed = new URL(url);
+      const isLocalhost = parsed.hostname === "localhost" || parsed.hostname === "127.0.0.1";
+      if (parsed.protocol !== "https:" && !(parsed.protocol === "http:" && isLocalhost)) {
+        return setErr("Origin must use HTTPS. Web push doesn't work over HTTP.");
+      }
+    } catch {
+      return setErr("Enter a valid URL (e.g. https://example.com).");
+    }
     setLoading(true);
     const res = await fetch("/api/sites", {
       method: "POST",
@@ -131,7 +140,7 @@ export function AddSiteModal({
                   inputMode="url"
                 />
                 <span className="mt-1.5 block text-[11px] text-muted">
-                  Subscribers from any other origin will be rejected.
+                  Must be HTTPS — web push doesn&apos;t work over HTTP.
                 </span>
               </label>
 

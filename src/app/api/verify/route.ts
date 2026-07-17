@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getDb } from "@/lib/mongo";
 import { normalizeOrigin } from "@/lib/ids";
+import { checkPublicRate, ipFrom } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 
@@ -16,15 +17,27 @@ export async function OPTIONS() {
 }
 
 export async function POST(req: Request) {
-  const { siteId, origin } = await req.json().catch(() => ({}));
-  if (!siteId) return json({ error: "bad" }, 400);
+  const ok = await checkPublicRate(`ver:${ipFrom(req)}`, 30, 60);
+  if (!ok) return json({ error: "rate_limited" }, 429);
+
+  const body = await req.json().catch(() => ({}));
+  const { siteId, origin } = body ?? {};
+  if (typeof siteId !== "string" || !siteId) return json({ error: "bad" }, 400);
+  if (typeof origin !== "string" || !origin) return json({ error: "bad" }, 400);
+
+  const reqOrigin = req.headers.get("origin");
+  let normalized: string | null = null;
+  try {
+    normalized = normalizeOrigin(origin);
+  } catch {}
+  if (!normalized || reqOrigin !== normalized) {
+    return json({ error: "origin_mismatch" }, 403);
+  }
 
   const db = await getDb();
   const site = await db.collection("sites").findOne({ siteId });
   if (!site) return json({ ok: false }, 404);
 
-  let normalized: string | null = null;
-  try { normalized = normalizeOrigin(origin); } catch {}
   if (normalized === site.origin && !site.verified) {
     await db.collection("sites").updateOne({ siteId }, { $set: { verified: true, verifiedAt: new Date() } });
   }

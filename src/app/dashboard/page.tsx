@@ -4,6 +4,7 @@ import { getDb } from "@/lib/mongo";
 import AddSiteButton from "./AddSiteButton";
 import { HoverGridCards, HoverCard } from "@/components/ui/HoverGridCards";
 import CopySnippetButton from "./CopySnippetButton";
+import SiteFavicon from "@/components/ui/SiteFavicon";
 
 export const dynamic = "force-dynamic";
 
@@ -17,10 +18,9 @@ export default async function DashboardHome() {
     .toArray();
 
   const withCounts = await Promise.all(
-    sites.map(async (s) => {
-      const [subs, sent, last] = await Promise.all([
+    sites.map(async (s: any) => {
+      const [subs, last] = await Promise.all([
         db.collection("subscribers").countDocuments({ siteId: s.siteId }),
-        db.collection("notifications").countDocuments({ siteId: s.siteId }),
         db
           .collection("notifications")
           .find({ siteId: s.siteId })
@@ -31,7 +31,7 @@ export default async function DashboardHome() {
       return {
         ...s,
         subs,
-        sent,
+        sent: s.sentCount ?? 0,
         lastTitle: last[0]?.title ?? null,
         lastAt: last[0]?.sentAt ?? null,
       };
@@ -50,8 +50,8 @@ export default async function DashboardHome() {
           <h1 className="mt-2 text-2xl font-semibold tracking-tight sm:text-3xl">Your sites</h1>
           <p className="mt-1 text-sm text-muted">Add a site, drop the snippet, start sending.</p>
         </div>
-        <div className="flex flex-wrap items-stretch gap-3">
-          <div className="flex items-center gap-4 rounded-lg border border-border bg-panel/60 px-4 py-2 backdrop-blur sm:gap-5">
+        <div className="flex items-stretch gap-2 sm:gap-3">
+          <div className="flex min-w-0 flex-1 items-center justify-around gap-2 rounded-lg border border-border bg-panel/60 px-3 py-2 backdrop-blur sm:flex-initial sm:justify-start sm:gap-5 sm:px-4">
             <Stat label="Sites" value={withCounts.length} />
             <Divider />
             <Stat label="Subs" value={totalSubs} />
@@ -79,14 +79,21 @@ export default async function DashboardHome() {
                     href={`/dashboard/sites/${s.siteId}`}
                     className="flex items-start justify-between gap-3"
                   >
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-2">
-                        <StatusDot ok={s.verified} />
-                        <span className="truncate text-base font-semibold">
-                          {s.name || s.origin}
-                        </span>
+                    <div className="flex min-w-0 items-start gap-3">
+                      <SiteFavicon
+                        host={hostOf(s.origin)}
+                        fallback={(s.name || s.origin || "?").trim().charAt(0).toUpperCase()}
+                        size={36}
+                      />
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="truncate text-base font-semibold">
+                            {s.name || s.origin}
+                          </span>
+                          <StatusPill ok={s.verified} />
+                        </div>
+                        <div className="mt-1 truncate text-xs text-muted">{s.origin}</div>
                       </div>
-                      <div className="mt-1 truncate text-xs text-muted">{s.origin}</div>
                     </div>
                     <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-border bg-black/40 text-muted transition group-hover/card:border-accent/60 group-hover/card:text-white">
                       <svg
@@ -152,6 +159,7 @@ function Footer() {
       <div className="flex flex-col items-center justify-between gap-3 sm:flex-row">
         <div className="flex items-center gap-4">
           <span>Layla — layla.wtf</span>
+          <Link href="/faq" className="hover:text-white">FAQ</Link>
           <Link href="/tos" className="hover:text-white">Terms</Link>
         </div>
         <div>Made without cookies.</div>
@@ -173,15 +181,18 @@ function Divider() {
   return <div className="h-4 w-px bg-border/70" aria-hidden />;
 }
 
-function StatusDot({ ok }: { ok?: boolean }) {
+function StatusPill({ ok }: { ok?: boolean }) {
   return (
     <span
       className={
-        "h-2 w-2 shrink-0 rounded-full " +
-        (ok ? "bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.6)]" : "bg-yellow-400/70")
+        "inline-flex shrink-0 items-center rounded-full border px-1.5 py-0.5 text-[10px] font-medium " +
+        (ok
+          ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
+          : "border-yellow-500/30 bg-yellow-500/10 text-yellow-400")
       }
-      aria-hidden
-    />
+    >
+      {ok ? "Ready" : "Pending"}
+    </span>
   );
 }
 
@@ -192,7 +203,7 @@ function MiniStat({ label, value }: { label: string; value: number }) {
       <div className="mt-0.5 text-base font-semibold">{value}</div>
     </div>
   );
-}
+} 
 
 function EmptyState() {
   return (
@@ -209,6 +220,14 @@ function EmptyState() {
       </p>
     </div>
   );
+}
+
+function hostOf(origin: string) {
+  try {
+    return new URL(origin).host;
+  } catch {
+    return origin;
+  }
 }
 
 function timeAgo(d: Date) {

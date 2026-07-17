@@ -12,25 +12,25 @@ export default function Snippet({ siteId, appUrl }: { siteId: string; appUrl: st
   }
 
   return (
-    <div className="rounded-xl border border-border bg-panel p-4 sm:p-6">
-      <div className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between">
+    <div className="rounded-xl border border-white/[0.08] bg-white/[0.02]">
+      <div className="flex flex-col gap-1 border-b border-white/[0.06] px-5 py-3 sm:flex-row sm:items-baseline sm:justify-between">
         <h2 className="text-sm font-semibold text-white">Install snippet</h2>
-        <p className="text-xs text-muted">
-          Paste before <code className="rounded bg-black/60 px-1 py-0.5 text-[11px]">&lt;/body&gt;</code>.
+        <p className="text-[12px] text-white/50">
+          Paste before <code className="rounded bg-white/[0.06] px-1 py-0.5 text-[11px] text-white/80">&lt;/body&gt;</code>
         </p>
       </div>
 
-      <div className="relative mt-4">
-        <pre className="overflow-x-auto rounded-lg border border-border bg-black p-3 pr-24 text-xs leading-relaxed sm:p-4">
-          <code className="text-white/90">{snippet}</code>
+      <div className="relative p-5">
+        <pre className="overflow-x-auto rounded-md border border-white/10 bg-black/60 p-4 pr-24 font-mono text-[12px] leading-relaxed text-white/80">
+          <code>{snippet}</code>
         </pre>
         <button
           onClick={copy}
           className={
-            "absolute right-2 top-2 inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-xs font-medium transition " +
+            "absolute right-7 top-7 inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-[11px] font-medium transition " +
             (copied
-              ? "border-emerald-500/50 bg-emerald-500/10 text-emerald-300"
-              : "border-border bg-panel text-muted hover:border-accent hover:text-white")
+              ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-400"
+              : "border-white/10 bg-white/[0.03] text-white/60 hover:border-white/25 hover:text-white")
           }
         >
           {copied ? (

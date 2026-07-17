@@ -13,7 +13,13 @@ export async function POST(req: Request) {
   let origin: string;
   try {
     origin = normalizeOrigin(url);
-  } catch {
+  } catch (e: any) {
+    if (e?.message === "https_required") {
+      return NextResponse.json(
+        { error: "Origin must use HTTPS. Web push doesn't work over HTTP." },
+        { status: 400 }
+      );
+    }
     return NextResponse.json({ error: "Invalid URL" }, { status: 400 });
   }
 
