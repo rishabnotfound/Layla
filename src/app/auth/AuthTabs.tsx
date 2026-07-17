@@ -5,6 +5,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { VanishInput } from "@/components/ui/VanishInput";
 import { TosModal } from "@/components/ui/TosModal";
 import { Turnstile } from "@/components/ui/Turnstile";
+import { StatefulButton } from "@/components/ui/StatefulButton";
 
 type Tab = "signin" | "signup";
 
@@ -158,13 +159,13 @@ function SignInForm({ next }: { next: string }) {
 
       {err && <p className="mt-3 text-sm text-red-400">{err}</p>}
 
-      <button
+      <StatefulButton
         onClick={submit}
         disabled={loading || code.replace(/\D/g, "").length !== 16 || !captcha}
-        className="mt-5 w-full rounded-lg bg-accent px-4 py-3 text-sm font-medium text-white transition hover:bg-accent-hover disabled:opacity-40"
+        className="mt-5 w-full bg-accent py-3 text-white hover:bg-accent-hover"
       >
         {loading ? "Checking…" : "Sign in"}
-      </button>
+      </StatefulButton>
 
       <p className="mt-4 text-center text-xs text-muted">
         Sessions last 7 days. Codes never expire — save yours.
@@ -243,13 +244,13 @@ function SignUpForm() {
 
           {err && <p className="mt-3 text-sm text-red-400">{err}</p>}
 
-          <button
+          <StatefulButton
             onClick={requestCreate}
             disabled={loading || !captcha}
-            className="mt-5 w-full rounded-lg bg-accent px-4 py-3 text-sm font-medium text-white transition hover:bg-accent-hover disabled:opacity-40"
+            className="mt-5 w-full bg-accent py-3 text-white hover:bg-accent-hover"
           >
             {loading ? "Generating…" : "Generate my code"}
-          </button>
+          </StatefulButton>
         </>
       )}
 

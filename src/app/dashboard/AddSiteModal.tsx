@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
+import { StatefulButton } from "@/components/ui/StatefulButton";
 
 export function AddSiteModal({
   open,
@@ -42,30 +43,39 @@ export function AddSiteModal({
     };
   }, [open, onClose]);
 
-  async function submit(e: React.FormEvent) {
-    e.preventDefault();
+  async function submit() {
     setErr(null);
     try {
       const parsed = new URL(url);
       const isLocalhost = parsed.hostname === "localhost" || parsed.hostname === "127.0.0.1";
       if (parsed.protocol !== "https:" && !(parsed.protocol === "http:" && isLocalhost)) {
-        return setErr("Origin must use HTTPS. Web push doesn't work over HTTP.");
+        setErr("Origin must use HTTPS. Web push doesn't work over HTTP.");
+        throw new Error("invalid_protocol");
       }
-    } catch {
-      return setErr("Enter a valid URL (e.g. https://example.com).");
+    } catch (e: any) {
+      if (e?.message !== "invalid_protocol") {
+        setErr("Enter a valid URL (e.g. https://example.com).");
+      }
+      throw e;
     }
     setLoading(true);
-    const res = await fetch("/api/sites", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, url }),
-    });
-    const j = await res.json();
-    setLoading(false);
-    if (!res.ok) return setErr(j.error || "Failed");
-    onClose();
-    router.push(`/dashboard/sites/${j.siteId}`);
-    router.refresh();
+    try {
+      const res = await fetch("/api/sites", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, url }),
+      });
+      const j = await res.json();
+      if (!res.ok) {
+        setErr(j.error || "Failed");
+        throw new Error("failed");
+      }
+      onClose();
+      router.push(`/dashboard/sites/${j.siteId}`);
+      router.refresh();
+    } finally {
+      setLoading(false);
+    }
   }
 
   if (!mounted) return null;
@@ -116,7 +126,7 @@ export function AddSiteModal({
               </button>
             </div>
 
-            <form onSubmit={submit} className="flex flex-col gap-4 px-5 py-5">
+            <div className="flex flex-col gap-4 px-5 py-5">
               <label className="block">
                 <span className="mb-1.5 block text-xs font-medium text-white">
                   Name <span className="text-muted">(optional)</span>
@@ -158,15 +168,15 @@ export function AddSiteModal({
                 >
                   Cancel
                 </button>
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="flex-1 rounded-lg bg-accent px-4 py-2.5 text-sm font-medium text-white transition hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-40"
+                <StatefulButton
+                  onClick={submit}
+                  disabled={loading || !url}
+                  className="flex-1 bg-accent text-white hover:bg-accent-hover"
                 >
                   {loading ? "Adding…" : "Add site"}
-                </button>
+                </StatefulButton>
               </div>
-            </form>
+            </div>
           </motion.div>
         </motion.div>
       )}

@@ -2,6 +2,7 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import NotificationPreview from "./NotificationPreview";
+import { StatefulButton } from "@/components/ui/StatefulButton";
 
 export default function Composer({
   siteId,
@@ -28,32 +29,38 @@ export default function Composer({
     }
   }, [origin]);
 
-  async function send(e: React.FormEvent) {
-    e.preventDefault();
+  async function send() {
+    if (!title.trim() || !body.trim()) {
+      setMsg({ ok: false, text: "Title and message are required." });
+      throw new Error("invalid");
+    }
     setLoading(true);
     setMsg(null);
-    const res = await fetch(`/api/sites/${siteId}/notifications`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ title, body, url, icon }),
-    });
-    const j = await res.json();
-    setLoading(false);
-    if (!res.ok) return setMsg({ ok: false, text: j.error || "Failed" });
-    setMsg({ ok: true, text: `Sent to ${j.delivered}/${j.attempted} subscribers` });
-    setTitle("");
-    setBody("");
-    setUrl("");
-    setIcon("");
-    router.refresh();
+    try {
+      const res = await fetch(`/api/sites/${siteId}/notifications`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title, body, url, icon }),
+      });
+      const j = await res.json();
+      if (!res.ok) {
+        setMsg({ ok: false, text: j.error || "Failed" });
+        throw new Error("send_failed");
+      }
+      setMsg({ ok: true, text: `Sent to ${j.delivered}/${j.attempted} subscribers` });
+      setTitle("");
+      setBody("");
+      setUrl("");
+      setIcon("");
+      router.refresh();
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
     <section className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
-      <form
-        onSubmit={send}
-        className="rounded-xl border border-white/[0.08] bg-white/[0.02]"
-      >
+      <div className="rounded-xl border border-white/[0.08] bg-white/[0.02]">
         <div className="flex items-center justify-between border-b border-white/[0.06] px-5 py-3">
           <h2 className="text-sm font-semibold text-white">New notification</h2>
           {disabled && (
@@ -129,15 +136,16 @@ export default function Composer({
                 Sends to all subscribers of this site.
               </span>
             )}
-            <button
-              disabled={loading || disabled}
-              className="inline-flex items-center justify-center rounded-md bg-white px-4 py-2 text-sm font-medium text-black transition hover:bg-white/90 disabled:cursor-not-allowed disabled:bg-white/20 disabled:text-white/40"
+            <StatefulButton
+              onClick={send}
+              disabled={loading || disabled || !title.trim() || !body.trim()}
+              className="bg-white text-black hover:bg-white/90 disabled:bg-white/20 disabled:text-white/40"
             >
               {loading ? "Sending…" : "Send"}
-            </button>
+            </StatefulButton>
           </div>
         </div>
-      </form>
+      </div>
 
       <NotificationPreview
         title={title || "Your title goes here"}

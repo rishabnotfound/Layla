@@ -21,7 +21,6 @@ const nextConfig = {
         source: "/embed/:path*",
         headers: [
           { key: "Access-Control-Allow-Origin", value: "*" },
-          { key: "Cache-Control", value: "public, max-age=300, s-maxage=300" },
           { key: "X-Robots-Tag", value: "noindex, nofollow" },
         ],
       },
@@ -34,7 +33,6 @@ const nextConfig = {
         headers: [
           { key: "Access-Control-Allow-Origin", value: "*" },
           { key: "Service-Worker-Allowed", value: "/" },
-          { key: "Cache-Control", value: "no-cache" },
         ],
       },
       {

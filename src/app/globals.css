@@ -55,3 +55,13 @@ textarea:focus {
 .label {
   @apply mb-1 block text-xs uppercase tracking-wider text-muted;
 }
+
+.scrollbar-none {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}

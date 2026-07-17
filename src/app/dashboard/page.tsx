@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { getSession } from "@/lib/auth";
 import { getDb } from "@/lib/mongo";
@@ -158,6 +159,7 @@ function Footer() {
     <footer className="mt-auto border-t border-border/60 pt-6 text-xs text-muted">
       <div className="flex flex-col items-center justify-between gap-3 sm:flex-row">
         <div className="flex items-center gap-4">
+          <Image src="/logo.png" alt="" width={16} height={16} />
           <span>Layla — layla.wtf</span>
           <Link href="/faq" className="hover:text-white">FAQ</Link>
           <Link href="/tos" className="hover:text-white">Terms</Link>

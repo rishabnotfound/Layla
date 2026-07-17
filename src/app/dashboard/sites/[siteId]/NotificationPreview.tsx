@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import Image from "next/image";
+import { AnimatePresence, motion, LayoutGroup } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 type OS = "macos" | "windows" | "android" | "chrome" | "brave";
@@ -38,37 +39,57 @@ export default function NotificationPreview({
         </span>
       </div>
 
-      <div className="flex flex-wrap gap-1 border-b border-border/60 px-3 py-2">
-        {OS_META.map((o) => (
-          <button
-            key={o.id}
-            type="button"
-            onClick={() => setOs(o.id)}
-            className={cn(
-              "rounded-md px-2.5 py-1 text-[11px] font-medium transition",
-              os === o.id
-                ? "bg-accent text-white shadow-[0_0_20px_-6px_rgba(93,10,209,0.8)]"
-                : "text-muted hover:bg-white/5 hover:text-white"
-            )}
-          >
-            {o.label}
-          </button>
-        ))}
-      </div>
+      <LayoutGroup id="os-preview-tabs">
+        <div className="flex flex-wrap gap-1 border-b border-border/60 px-3 py-2">
+          {OS_META.map((o) => {
+            const active = os === o.id;
+            return (
+              <button
+                key={o.id}
+                type="button"
+                onClick={() => setOs(o.id)}
+                className={cn(
+                  "relative rounded-md px-2.5 py-1 text-[11px] font-medium transition",
+                  active ? "text-white" : "text-muted hover:text-white"
+                )}
+              >
+                {active && (
+                  <motion.span
+                    layoutId="os-preview-pill"
+                    className="absolute inset-0 rounded-md bg-accent shadow-[0_0_20px_-6px_rgba(93,10,209,0.8)]"
+                    transition={{ type: "spring", stiffness: 380, damping: 32 }}
+                  />
+                )}
+                <span className="relative z-10">{o.label}</span>
+              </button>
+            );
+          })}
+        </div>
+      </LayoutGroup>
 
       <div
         className={cn(
-          "relative flex flex-1 items-center justify-center overflow-hidden p-6",
+          "relative flex flex-1 items-center justify-center overflow-hidden p-6 transition-colors duration-300",
           bgFor(os)
         )}
       >
         <div className="absolute inset-0 opacity-30 [background-image:radial-gradient(circle_at_20%_10%,rgba(255,255,255,0.06),transparent_50%),radial-gradient(circle_at_80%_90%,rgba(93,10,209,0.15),transparent_50%)]" />
         <div className="relative w-full max-w-sm">
-          {os === "macos" && <MacToast title={title} body={body} iconUrl={iconUrl} originHost={originHost} />}
-          {os === "windows" && <WinToast title={title} body={body} iconUrl={iconUrl} originHost={originHost} />}
-          {os === "android" && <AndroidToast title={title} body={body} iconUrl={iconUrl} originHost={originHost} />}
-          {os === "chrome" && <ChromeToast title={title} body={body} iconUrl={iconUrl} originHost={originHost} />}
-          {os === "brave" && <BraveToast title={title} body={body} iconUrl={iconUrl} originHost={originHost} />}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={os}
+              initial={{ opacity: 0, y: 8, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -8, scale: 0.98 }}
+              transition={{ duration: 0.2, ease: "easeOut" }}
+            >
+              {os === "macos" && <MacToast title={title} body={body} iconUrl={iconUrl} originHost={originHost} />}
+              {os === "windows" && <WinToast title={title} body={body} iconUrl={iconUrl} originHost={originHost} />}
+              {os === "android" && <AndroidToast title={title} body={body} iconUrl={iconUrl} originHost={originHost} />}
+              {os === "chrome" && <ChromeToast title={title} body={body} iconUrl={iconUrl} originHost={originHost} />}
+              {os === "brave" && <BraveToast title={title} body={body} iconUrl={iconUrl} originHost={originHost} />}
+            </motion.div>
+          </AnimatePresence>
         </div>
       </div>
     </div>
