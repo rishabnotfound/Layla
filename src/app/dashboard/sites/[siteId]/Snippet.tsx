@@ -72,7 +72,7 @@ export default function Snippet({ siteId, appUrl }: { siteId: string; appUrl: st
               )}
             </button>
             <span className="text-[12px] text-white/50">
-              Then upload to your root, so it's reachable at{" "}
+              Then upload to your root, so it&apos;s reachable at{" "}
               <code className="rounded bg-white/[0.06] px-1 text-white/80">yoursite.com/layla-sw.js</code>
             </span>
           </div>
