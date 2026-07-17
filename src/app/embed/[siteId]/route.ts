@@ -54,9 +54,16 @@ function buildEmbed({ siteId, appUrl, vapidPublic }: { siteId: string; appUrl: s
   async function register(){
     var reg;
     try {
-      reg = await navigator.serviceWorker.register(API + '/sw.js', { scope: '/' });
+      var probe = await fetch('/layla-sw.js', { method: 'GET', cache: 'no-store' });
+      var ct = (probe.headers.get('content-type') || '').toLowerCase();
+      if (!probe.ok || ct.indexOf('javascript') === -1) {
+        console.error('[Layla] /layla-sw.js is missing or not JavaScript (content-type: ' + ct + '). Download it from ' + API + '/sw.js and place it at the root of your site.');
+        return;
+      }
+      reg = await navigator.serviceWorker.register('/layla-sw.js', { scope: '/' });
     } catch(e){
-      try { reg = await navigator.serviceWorker.register('/layla-sw.js'); } catch(_){ return; }
+      console.error('[Layla] Service worker registration failed:', e && e.message ? e.message : e);
+      return;
     }
     ping('loaded');
 

@@ -96,11 +96,11 @@ export default async function Home() {
         <div className="mx-auto max-w-4xl px-6 text-center">
           <div className="mb-3 text-xs uppercase tracking-[0.2em] text-accent">Install in seconds</div>
           <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-            One line. That&apos;s the install.
+            One file. One script tag.
           </h2>
           <p className="mx-auto mt-3 max-w-lg text-sm text-muted">
-            Paste this before <code className="text-white">&lt;/body&gt;</code>. Layla handles the service worker,
-            the subscription, and delivery.
+            Drop <code className="text-white">layla-sw.js</code> at the root of your site, then paste the
+            snippet before <code className="text-white">&lt;/body&gt;</code>. That&apos;s it.
           </p>
           <div className="mt-10">
             <SnippetPreview />

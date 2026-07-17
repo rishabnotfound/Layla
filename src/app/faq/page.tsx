@@ -55,7 +55,11 @@ const categories: Category[] = [
       },
       {
         q: "The user clicked 'Allow' but they don't appear in Subscribers. Why?",
-        a: "A few common causes: (1) the site is not served over HTTPS, (2) the service worker file isn't reachable at the site root, (3) an existing service worker is blocking Layla's registration, (4) the browser silently blocked the subscription (Brave, private mode). Open DevTools → Application → Service Workers to inspect.",
+        a: "A few common causes: (1) the site is not served over HTTPS, (2) the layla-sw.js file isn't reachable at the site root (open yoursite.com/layla-sw.js — it must return JavaScript, not your SPA's index.html), (3) an existing service worker is blocking Layla's registration, (4) the browser silently blocked the subscription (Brave, private mode). Open DevTools → Application → Service Workers to inspect.",
+      },
+      {
+        q: "Why do I have to upload layla-sw.js? Can't the script do everything?",
+        a: "Browsers only allow a service worker to be registered from the same origin as the page. That's a hard security rule — a service worker at layla.wtf can't be installed on yoursite.com. So the SW file has to live at yoursite.com/layla-sw.js. Every push notification service (OneSignal, Pushly, etc.) has the same requirement. It's a one-time file upload.",
       },
       {
         q: "How do I test that push is working?",
