@@ -12,7 +12,6 @@ Web push notifications, without the bloat.
 
 Drop one line of JS on your site and start sending browser push notifications. No email, no trackers, no cookies. A 16-digit code is your entire account.
 
-Live at [layla.wtf](https://layla.wtf).
 
 <p align="center">
     <img src="./public/banner.png" width="900" height="400" />
