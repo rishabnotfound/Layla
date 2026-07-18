@@ -37,6 +37,7 @@ export function getDb(): Promise<Db> {
             { at: 1 },
             { expireAfterSeconds: 900 }
           ),
+          db.collection("admin_audit").createIndex({ at: -1 }),
         ]);
         global._mongoIndexed = true;
       }
