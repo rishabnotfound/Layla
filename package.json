@@ -3,14 +3,18 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "concurrently -n web,queue -c cyan,magenta \"next dev\" \"node queue.js\"",
+    "dev:web": "next dev",
+    "dev:queue": "node queue.js",
     "build": "next build",
     "start": "next start",
+    "queue": "node queue.js",
     "lint": "next lint",
     "gen:vapid": "node scripts/gen-vapid.js"
   },
   "dependencies": {
     "clsx": "^2.1.1",
+    "dotenv": "^16.6.1",
     "framer-motion": "^12.42.2",
     "jose": "^5.9.6",
     "mongodb": "^6.11.0",
@@ -27,6 +31,7 @@
     "@types/react-dom": "^18.3.0",
     "@types/web-push": "^3.6.4",
     "autoprefixer": "^10.4.20",
+    "concurrently": "^9.2.4",
     "eslint": "^8.57.1",
     "eslint-config-next": "14.2.15",
     "postcss": "^8.4.47",

@@ -3,6 +3,7 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import NotificationPreview from "./NotificationPreview";
 import { StatefulButton } from "@/components/ui/StatefulButton";
+import { useSendTray } from "@/app/dashboard/SendTrayProvider";
 
 export default function Composer({
   siteId,
@@ -14,6 +15,7 @@ export default function Composer({
   disabled: boolean;
 }) {
   const router = useRouter();
+  const tray = useSendTray();
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [url, setUrl] = useState("");
@@ -46,24 +48,38 @@ export default function Composer({
     setLoading(true);
     setMsg(null);
     try {
+      const submitted = { title, body, url, icon, image, actions: cleanActions };
       const res = await fetch(`/api/sites/${siteId}/notifications`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title, body, url, icon, image, actions: cleanActions }),
+        body: JSON.stringify(submitted),
       });
       const j = await res.json();
       if (!res.ok) {
-        setMsg({ ok: false, text: j.error || "Failed" });
+        const text =
+          j.error === "too_many_active"
+            ? `You already have ${j.active}/${j.limit} sends running. Wait for one to finish.`
+            : j.error === "no_subscribers"
+              ? "This site has no subscribers yet."
+              : j.error || "Failed";
+        setMsg({ ok: false, text });
         throw new Error("send_failed");
       }
-      setMsg({ ok: true, text: `Sent to ${j.delivered}/${j.attempted} subscribers` });
+      tray.enqueue({
+        id: j.notificationId,
+        siteId,
+        origin,
+        title: submitted.title,
+        attempted: j.attempted || 0,
+      });
+      setMsg({ ok: true, text: "Queued — track progress in the bell above." });
       setTitle("");
       setBody("");
       setUrl("");
       setIcon("");
       setImage("");
       setActions([]);
-      router.refresh();
+      setTimeout(() => router.refresh(), 800);
     } finally {
       setLoading(false);
     }
@@ -210,17 +226,22 @@ export default function Composer({
                 />
                 {msg.text}
               </span>
+            ) : tray.atLimit ? (
+              <span className="inline-flex items-center gap-2 text-[12px] text-yellow-400">
+                <span className="h-1.5 w-1.5 rounded-full bg-yellow-400" />
+                Send limit reached ({tray.active.length}/{tray.limit}). Wait for one to finish.
+              </span>
             ) : (
               <span className="text-[12px] text-white/40">
-                Sends to all subscribers of this site.
+                Sends to all subscribers · {tray.active.length}/{tray.limit} in flight
               </span>
             )}
             <StatefulButton
               onClick={send}
-              disabled={loading || disabled || !title.trim() || !body.trim()}
+              disabled={loading || disabled || !title.trim() || !body.trim() || tray.atLimit}
               className="bg-white text-black hover:bg-white/90 disabled:bg-white/20 disabled:text-white/40"
             >
-              {loading ? "Sending…" : "Send"}
+              {loading ? "Queuing…" : "Send"}
             </StatefulButton>
           </div>
         </div>

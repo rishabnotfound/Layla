@@ -32,6 +32,7 @@ export function getDb(): Promise<Db> {
             { unique: true }
           ),
           db.collection("notifications").createIndex({ siteId: 1, sentAt: -1 }),
+          db.collection("notifications").createIndex({ status: 1, sentAt: 1 }),
           db.collection("login_attempts").createIndex({ ip: 1 }),
           db.collection("login_attempts").createIndex(
             { at: 1 },

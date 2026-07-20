@@ -1,11 +1,22 @@
 import { NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 import { getDb } from "@/lib/mongo";
-import { webpush } from "@/lib/push";
 import { z } from "zod";
 
 export const runtime = "nodejs";
-export const maxDuration = 60;
+export const maxDuration = 10;
+
+import { MAX_ACTIVE_JOBS_PER_USER } from "@/lib/limits";
+
+const QUEUE_URL = process.env.QUEUE_URL || "http://127.0.0.1:4001";
+
+async function kickQueue() {
+  try {
+    await fetch(`${QUEUE_URL}/kick`, { method: "POST" });
+  } catch {
+    // worker will pick it up on next poll
+  }
+}
 
 const httpsUrl = z
   .string()
@@ -47,84 +58,47 @@ export async function POST(req: Request, { params }: { params: { siteId: string 
   const site = await db.collection("sites").findOne({ siteId: params.siteId, userId: session.uid });
   if (!site) return NextResponse.json({ error: "not_found" }, { status: 404 });
 
-  const subs = await db.collection("subscribers").find({ siteId: site.siteId }).toArray();
+  const userSiteIds = await db
+    .collection("sites")
+    .find({ userId: session.uid }, { projection: { siteId: 1 } })
+    .toArray();
+  const activeCount = await db.collection("notifications").countDocuments({
+    siteId: { $in: userSiteIds.map((s: any) => s.siteId) },
+    status: { $in: ["pending", "sending"] },
+  });
+  if (activeCount >= MAX_ACTIVE_JOBS_PER_USER) {
+    return NextResponse.json(
+      { error: "too_many_active", limit: MAX_ACTIVE_JOBS_PER_USER, active: activeCount },
+      { status: 429 },
+    );
+  }
+
+  const subCount = await db.collection("subscribers").countDocuments({ siteId: site.siteId });
+  if (subCount === 0) {
+    return NextResponse.json({ error: "no_subscribers" }, { status: 400 });
+  }
 
   const actions = (parsed.data.actions || []).filter((a) => a.label && a.url);
-  const payload = JSON.stringify({
-    title: parsed.data.title,
-    body: parsed.data.body,
-    url: parsed.data.url || site.origin,
-    icon: parsed.data.icon || undefined,
-    image: parsed.data.image || undefined,
-    actions: actions.length ? actions : undefined,
-  });
 
-  let delivered = 0;
-  let failed = 0;
-  const gone: string[] = [];
-
-  if (!process.env.VAPID_PUBLIC_KEY || !process.env.VAPID_PRIVATE_KEY) {
-    return NextResponse.json({ error: "VAPID keys not configured on server" }, { status: 500 });
-  }
-
-  await Promise.all(
-    subs.map(async (s: any) => {
-      try {
-        await webpush.sendNotification(
-          { endpoint: s.endpoint, keys: s.keys },
-          payload,
-          { TTL: 60 * 60 * 24 }
-        );
-        delivered++;
-      } catch (e: any) {
-        failed++;
-        const code = e?.statusCode;
-        if (code === 404 || code === 410) gone.push(s.endpoint);
-      }
-    })
-  );
-
-  if (gone.length) {
-    await db.collection("subscribers").deleteMany({ siteId: site.siteId, endpoint: { $in: gone } });
-  }
-
-  await db.collection("notifications").insertOne({
+  const { insertedId } = await db.collection("notifications").insertOne({
     siteId: site.siteId,
     title: parsed.data.title,
     body: parsed.data.body,
-    url: parsed.data.url || null,
+    url: parsed.data.url || site.origin,
     icon: parsed.data.icon || null,
     image: parsed.data.image || null,
     actions: actions.length ? actions : null,
-    attempted: subs.length,
-    delivered,
+    attempted: subCount,
+    delivered: 0,
+    failed: 0,
+    status: "pending",
     sentAt: new Date(),
   });
 
-  await db.collection("sites").updateOne(
-    { siteId: site.siteId },
-    {
-      $inc: {
-        sentCount: 1,
-        attemptedTotal: subs.length,
-        deliveredTotal: delivered,
-      },
-    }
+  kickQueue();
+
+  return NextResponse.json(
+    { ok: true, notificationId: insertedId.toString(), attempted: subCount },
+    { status: 202 },
   );
-
-  const HISTORY_LIMIT = 10;
-  const keep = await db
-    .collection("notifications")
-    .find({ siteId: site.siteId }, { projection: { _id: 1 } })
-    .sort({ sentAt: -1 })
-    .limit(HISTORY_LIMIT)
-    .toArray();
-  if (keep.length === HISTORY_LIMIT) {
-    await db.collection("notifications").deleteMany({
-      siteId: site.siteId,
-      _id: { $nin: keep.map((n: any) => n._id) },
-    });
-  }
-
-  return NextResponse.json({ ok: true, attempted: subs.length, delivered, failed });
 }

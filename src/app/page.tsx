@@ -2,17 +2,51 @@ import Link from "next/link";
 import Image from "next/image";
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth";
+import { getDb } from "@/lib/mongo";
 import { GridBackground } from "@/components/ui/GridBackground";
 import { BentoGrid, BentoCard } from "@/components/ui/BentoGrid";
 import { HoverBorderGradient } from "@/components/ui/HoverBorderGradient";
 import { TextGenerate } from "@/components/ui/TextGenerate";
 import SnippetPreview from "./_landing/SnippetPreview";
 import Workflow from "./_landing/Workflow";
+import StatsHover from "./_landing/StatsHover";
 
 export const dynamic = "force-dynamic";
 
+async function getPublicStats() {
+  try {
+    const db = await getDb();
+    const [users, sites, subscribers, agg] = await Promise.all([
+      db.collection("users").countDocuments(),
+      db.collection("sites").countDocuments(),
+      db.collection("subscribers").countDocuments(),
+      db
+        .collection("sites")
+        .aggregate([
+          { $group: { _id: null, delivered: { $sum: { $ifNull: ["$deliveredTotal", 0] } } } },
+        ])
+        .toArray(),
+    ]);
+    return {
+      users,
+      sites,
+      subscribers,
+      delivered: (agg[0] as { delivered?: number } | undefined)?.delivered || 0,
+    };
+  } catch {
+    return null;
+  }
+}
+
+function fmt(n: number) {
+  if (n >= 1_000_000) return (n / 1_000_000).toFixed(1).replace(/\.0$/, "") + "M";
+  if (n >= 1_000) return (n / 1_000).toFixed(1).replace(/\.0$/, "") + "k";
+  return n.toLocaleString();
+}
+
 export default async function Home() {
   if (await getSession()) redirect("/dashboard");
+  const stats = await getPublicStats();
   return (
     <div className="relative w-full overflow-x-hidden bg-black text-white">
       {/* NAV */}
@@ -90,6 +124,28 @@ export default async function Home() {
           <p className="mt-6 text-xs text-muted">Free. Self-hostable. Open in spirit.</p>
         </div>
       </section>
+
+      {/* STATS */}
+      {stats && (stats.users > 0 || stats.sites > 0 || stats.subscribers > 0) && (
+        <section className="relative border-t border-border/50 py-16">
+          <div className="mx-auto max-w-6xl px-6">
+            <div className="mb-8 text-center">
+              <div className="mb-3 text-xs uppercase tracking-[0.2em] text-accent">Trusted by builders</div>
+              <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+                A small community, growing quietly.
+              </h2>
+            </div>
+            <StatsHover
+              items={[
+                { label: "Accounts", value: fmt(stats.users) },
+                { label: "Sites registered", value: fmt(stats.sites) },
+                { label: "Push subscribers", value: fmt(stats.subscribers) },
+                { label: "Notifications delivered", value: fmt(stats.delivered) },
+              ]}
+            />
+          </div>
+        </section>
+      )}
 
       {/* SNIPPET */}
       <section className="relative border-t border-border/50 py-24">
@@ -209,7 +265,17 @@ export default async function Home() {
             <Image src="/logo.png" alt="" width={16} height={16} />
             <span>Layla — layla.wtf</span>
           </div>
-          <div>Made without cookies.</div>
+          <div>
+            Built with love by{" "}
+            <a
+              href="https://github.com/rishabnotfound"
+              target="_blank"
+              rel="noreferrer"
+              className="text-white hover:text-accent"
+            >
+              Rishab
+            </a>
+          </div>
         </div>
       </footer>
     </div>

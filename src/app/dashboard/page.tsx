@@ -164,7 +164,17 @@ function Footer() {
           <Link href="/faq" className="hover:text-white">FAQ</Link>
           <Link href="/tos" className="hover:text-white">Terms</Link>
         </div>
-        <div>Made without cookies.</div>
+        <div>
+          Built with love by{" "}
+          <a
+            href="https://github.com/rishabnotfound"
+            target="_blank"
+            rel="noreferrer"
+            className="text-white hover:text-accent"
+          >
+            Rishab
+          </a>
+        </div>
       </div>
     </footer>
   );

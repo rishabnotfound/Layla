@@ -46,7 +46,17 @@ export default async function AuthPage() {
             <Image src="/logo.png" alt="" width={16} height={16} />
             <span>Layla — layla.wtf</span>
           </div>
-          <div>Made without cookies.</div>
+          <div>
+            Built with love by{" "}
+            <a
+              href="https://github.com/rishabnotfound"
+              target="_blank"
+              rel="noreferrer"
+              className="text-white hover:text-accent"
+            >
+              Rishab
+            </a>
+          </div>
         </div>
       </footer>
     </div>
