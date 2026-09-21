@@ -8,6 +8,7 @@ import AuthTabs from "./AuthTabs";
 
 export const metadata = {
   title: "Sign in — Layla",
+  alternates: { canonical: "/auth" },
 };
 
 export const dynamic = "force-dynamic";

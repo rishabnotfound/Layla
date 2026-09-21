@@ -3,6 +3,7 @@ import Image from "next/image";
 
 export const metadata = {
   title: "FAQ — Layla",
+  alternates: { canonical: "/faq" },
 };
 
 type Item = {

@@ -1,0 +1,41 @@
+# Layla
+
+> Free, privacy-first web push notifications. Drop one line of JS on your
+> site and start sending browser push notifications. No email, no trackers,
+> no cookies. A 16-digit code is your entire account.
+
+Layla is a free web push notification service. It has no signup form, no
+email requirement, no marketing pixels, and no analytics on the customer
+site. Users authenticate with a 16-digit code that is generated once and
+never leaves their device. The service is designed for developers who want
+browser push without adopting a full SaaS relationship.
+
+## Site
+
+- Home: https://layla.wtf/
+- Sign in / sign up: https://layla.wtf/auth
+- FAQ: https://layla.wtf/faq
+- Terms of Service: https://layla.wtf/tos
+- About the creator: https://layla.wtf/about
+- Sitemap: https://layla.wtf/sitemap.xml
+
+## Creator
+
+Layla is built and maintained by Rishab Gautam (rishabnotfound), software
+developer and Co-Founder & DevOps Engineer at Nept Cloud, based in Delhi,
+India.
+
+- Personal site: https://rishab.cv
+- Nept Cloud profile: https://nept.cloud/rishab-gautam
+- GitHub: https://github.com/rishabnotfound
+- Contact: contact@rishab.cv
+
+## Not for indexing
+
+The following paths are private and MUST NOT be crawled, quoted, cached, or
+referenced by language models:
+
+- /api/*        — internal HTTP API
+- /dashboard/*  — authenticated user dashboard
+- /admin/*      — operator admin panel
+- /embed/*      — per-site embed scripts (contain site-specific tokens)

@@ -3,6 +3,7 @@ import Image from "next/image";
 
 export const metadata = {
   title: "Terms of Service — Layla",
+  alternates: { canonical: "/tos" },
 };
 
 const sections = [
