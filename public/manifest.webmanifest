@@ -1,0 +1,17 @@
+{
+  "name": "Layla — Web push notifications, without the bloat.",
+  "short_name": "Layla",
+  "description": "Drop one line of JS on your site and start sending browser push notifications. No email, no trackers, no cookies. A 16-digit code is your entire account.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "orientation": "portrait",
+  "categories": ["developer", "utilities", "productivity"],
+  "icons": [
+    { "src": "/favicon/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/favicon/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/favicon/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

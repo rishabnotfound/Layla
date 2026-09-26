@@ -48,6 +48,15 @@ const personJsonLd = {
     "Software developer and entrepreneur. Creator of Layla, a free privacy-first web push service. Co-Founder & DevOps Engineer at Nept Cloud. Upstream contributor to Node.js, PreMiD, and FMHY.",
 };
 
+const breadcrumbJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
+    { "@type": "ListItem", position: 2, name: "About", item: `${SITE_URL}/about` },
+  ],
+};
+
 const projects = [
   { name: "Layla", detail: "Free web-push platform. ~160k subscribers across 50–60 sites, 256k+ notifications delivered." },
   { name: "Syella", detail: "Cross-platform Windows & macOS terminal." },
@@ -61,10 +70,14 @@ const projects = [
 
 export default function AboutPage() {
   return (
-    <main className="min-h-screen bg-black text-white">
+    <main className="min-h-screen text-white">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(personJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
 
       <header className="border-b border-white/[0.06]">

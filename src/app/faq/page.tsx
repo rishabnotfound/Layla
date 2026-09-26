@@ -3,7 +3,16 @@ import Image from "next/image";
 
 export const metadata = {
   title: "FAQ — Layla",
+  description:
+    "Answers to common web-push questions: Brave, iOS, Safari icons, private mode, service workers, subscribers, delivery, and account recovery.",
   alternates: { canonical: "/faq" },
+  openGraph: {
+    title: "FAQ — Layla",
+    description:
+      "Common web-push questions answered: browser quirks, setup, delivery, and account.",
+    url: "https://layla.wtf/faq",
+    type: "article",
+  },
 };
 
 type Item = {
@@ -114,11 +123,40 @@ const categories: Category[] = [
   },
 ];
 
+const SITE_URL = "https://layla.wtf";
+
+const faqJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: categories.flatMap((c) =>
+    c.items.map((it) => ({
+      "@type": "Question",
+      name: it.q,
+      acceptedAnswer: { "@type": "Answer", text: it.a },
+    }))
+  ),
+};
+
+const breadcrumbJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
+    { "@type": "ListItem", position: 2, name: "FAQ", item: `${SITE_URL}/faq` },
+  ],
+};
+
 export default function FaqPage() {
   return (
-    <div className="relative min-h-screen overflow-hidden bg-black text-white">
-      <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[520px] bg-[radial-gradient(ellipse_at_top,rgba(93,10,209,0.22),transparent_60%)]" />
-      <div className="pointer-events-none absolute inset-0 -z-10 bg-[linear-gradient(to_bottom,transparent,rgba(0,0,0,0.6))]" />
+    <div className="relative min-h-screen overflow-hidden text-white">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
 
       <nav className="sticky top-0 z-30 border-b border-white/[0.06] bg-black/70 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-3">

@@ -3,8 +3,7 @@ import { clearSession } from "@/lib/auth";
 
 export const runtime = "nodejs";
 
-export async function POST(req: Request) {
+export async function POST() {
   clearSession();
-  const url = new URL("/", req.url);
-  return NextResponse.redirect(url, { status: 303 });
+  return new NextResponse(null, { status: 303, headers: { Location: "/" } });
 }

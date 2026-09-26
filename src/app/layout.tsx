@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import Script from "next/script";
+import HeroBackground from "@/components/ui/HeroBackground";
 import "./globals.css";
 
 const GA_ID = "G-KPE1BEC56P";
@@ -169,7 +170,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body className="min-h-screen bg-bg text-white">
-        {children}
+        <HeroBackground />
+        <div className="relative z-10">{children}</div>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}

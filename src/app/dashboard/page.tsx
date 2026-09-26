@@ -163,6 +163,7 @@ function Footer() {
           <span>Layla — layla.wtf</span>
           <Link href="/faq" className="hover:text-white">FAQ</Link>
           <Link href="/tos" className="hover:text-white">Terms</Link>
+          <Link href="/about" className="hover:text-white">About</Link>
         </div>
         <div>
           Built with love by{" "}

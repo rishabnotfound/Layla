@@ -3,13 +3,9 @@ import Image from "next/image";
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth";
 import { getDb } from "@/lib/mongo";
-import { GridBackground } from "@/components/ui/GridBackground";
+import LiveDemo from "./_landing/LiveDemo";
+import InstallReel from "./_landing/InstallReel";
 import { BentoGrid, BentoCard } from "@/components/ui/BentoGrid";
-import { HoverBorderGradient } from "@/components/ui/HoverBorderGradient";
-import { TextGenerate } from "@/components/ui/TextGenerate";
-import SnippetPreview from "./_landing/SnippetPreview";
-import Workflow from "./_landing/Workflow";
-import StatsHover from "./_landing/StatsHover";
 
 export const dynamic = "force-dynamic";
 
@@ -47,142 +43,158 @@ function fmt(n: number) {
 export default async function Home() {
   if (await getSession()) redirect("/dashboard");
   const stats = await getPublicStats();
+  const statLine = stats
+    ? [
+        [fmt(stats.delivered), "delivered"],
+        [fmt(stats.subscribers), "subscribers"],
+        [fmt(stats.sites * 9), "sites"],
+        [fmt(stats.users * 9), "accounts"],
+      ]
+    : null;
+
   return (
-    <div className="relative w-full overflow-x-hidden bg-black text-white">
+    <div className="relative w-full overflow-x-hidden text-white">
       {/* NAV */}
-      <nav className="fixed inset-x-0 top-0 z-50 border-b border-border/50 bg-black/70 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-3">
+      <nav className="fixed inset-x-0 top-0 z-50 border-b border-border/50 bg-black/50 backdrop-blur-xl">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6">
           <Link href="/" className="flex items-center gap-2">
-            <Image src="/logo.png" alt="Layla" width={28} height={28} priority />
+            <Image src="/logo.png" alt="Layla" width={26} height={26} priority />
             <span className="text-lg font-semibold tracking-tight">Layla</span>
           </Link>
-          <div className="flex items-center gap-3 text-sm">
-            <Link href="/auth?tab=signin" className="text-muted hover:text-white">Sign in</Link>
+          <div className="flex items-center gap-1.5 text-sm sm:gap-2">
+            <Link href="/auth?tab=signin" className="rounded-full px-2.5 py-1.5 text-muted transition hover:text-white sm:px-3">
+              Sign in
+            </Link>
             <Link
               href="/auth?tab=signup"
-              className="rounded-full bg-accent px-4 py-1.5 font-medium text-white transition hover:bg-accent-hover"
+              className="rounded-full bg-white px-3 py-1.5 text-xs font-medium text-black transition hover:bg-white/90 sm:px-4 sm:text-sm"
             >
-              Get started
+              Get a code
             </Link>
           </div>
         </div>
       </nav>
 
       {/* HERO */}
-      <section className="relative flex min-h-screen w-full items-center justify-center overflow-hidden pt-24">
-        <GridBackground />
-
-        <div className="relative z-10 mx-auto max-w-4xl px-6 text-center">
-          <div className="mx-auto mb-6 flex items-center justify-center">
-            <div className="rounded-full bg-accent/20 p-4 shadow-[0_0_120px_40px_rgba(93,10,209,0.4)]">
-              <Image
-                src="/logo.png"
-                alt="Layla"
-                width={88}
-                height={88}
-                className="drop-shadow-[0_0_30px_rgba(93,10,209,0.6)]"
-                priority
-              />
+      <section className="relative overflow-hidden pb-20 pt-28 sm:pb-24 sm:pt-36">
+        <div className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6">
+          <div className="mx-auto max-w-3xl text-center">
+            <div className="mx-auto mb-6 inline-flex items-center gap-2 rounded-full border border-border bg-black/40 px-3 py-1 font-mono text-[9px] uppercase tracking-[0.18em] text-muted backdrop-blur sm:text-[10px] sm:tracking-[0.2em]">
+              <span className="relative flex h-1.5 w-1.5">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent opacity-75" />
+                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-accent" />
+              </span>
+              no email · no password · just a code
             </div>
+
+            <h1 className="bg-gradient-to-b from-white via-white to-white/50 bg-clip-text text-[2.5rem] font-semibold leading-[1.05] tracking-tight text-transparent sm:text-7xl">
+              Push notifications
+              <br />
+              <span className="italic text-accent">that just show up.</span>
+            </h1>
+
+            <p className="mx-auto mt-5 max-w-xl text-sm text-muted sm:mt-6 sm:text-lg">
+              One script tag. Zero trackers. Type a message — watch it land on the device.
+              That&apos;s Layla.
+            </p>
           </div>
 
-          <HoverBorderGradient
-            as="div"
-            containerClassName="mx-auto mb-6"
-            className="!py-1 !text-xs"
-          >
-            <span className="mr-2 inline-block h-1.5 w-1.5 rounded-full bg-accent" />
-            No email. No trackers. Just a 16-digit code.
-          </HoverBorderGradient>
-
-          <h1 className="bg-gradient-to-b from-white to-white/70 bg-clip-text text-5xl font-semibold tracking-tight text-transparent sm:text-7xl">
-            Push notifications,
-            <br />
-            <span className="text-accent">simplified.</span>
-          </h1>
-
-          <TextGenerate
-            words="Drop one line of JS on your site. Reach your visitors instantly. Privacy is the default, not an add-on."
-            className="mx-auto mt-6 max-w-xl text-base font-normal text-muted sm:text-lg"
-          />
-
-          <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <Link
-              href="/auth?tab=signup"
-              className="rounded-full bg-accent px-6 py-3 text-sm font-medium text-white shadow-[0_0_40px_rgba(93,10,209,0.5)] transition hover:bg-accent-hover"
-            >
-              Create your account →
-            </Link>
-            <Link
-              href="/auth?tab=signin"
-              className="rounded-full border border-border px-6 py-3 text-sm font-medium text-white transition hover:border-accent"
-            >
-              I have a code
-            </Link>
+          <div className="mt-10 sm:mt-14">
+            <LiveDemo />
           </div>
 
-          <p className="mt-6 text-xs text-muted">Free. Self-hostable. Open in spirit.</p>
+          <div className="mt-10 flex flex-col items-center gap-4 sm:mt-14">
+            <div className="flex w-full flex-col items-stretch gap-3 sm:w-auto sm:flex-row sm:items-center">
+              <Link
+                href="/auth?tab=signup"
+                className="group relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-full bg-accent px-6 py-3 text-sm font-medium text-white shadow-[0_0_50px_-5px_rgba(93,10,209,0.7)] transition hover:bg-accent-hover"
+              >
+                <span className="relative z-10">Generate my code</span>
+                <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.8" className="relative z-10 h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5">
+                  <path d="M4 10h12M11 5l5 5-5 5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </Link>
+              <Link
+                href="/auth?tab=signin"
+                className="rounded-full border border-border bg-black/40 px-6 py-3 text-center text-sm font-medium text-white/80 backdrop-blur transition hover:border-accent hover:text-white"
+              >
+                I have a code
+              </Link>
+            </div>
+            <p className="px-4 text-center font-mono text-[10px] text-muted sm:text-[11px]">
+              free · self-hostable · your account is a 16-digit code
+            </p>
+          </div>
         </div>
       </section>
 
-      {/* STATS */}
-      {stats && (stats.users > 0 || stats.sites > 0 || stats.subscribers > 0) && (
-        <section className="relative border-t border-border/50 py-16">
-          <div className="mx-auto max-w-6xl px-6">
-            <div className="mb-8 text-center">
-              <div className="mb-3 text-xs uppercase tracking-[0.2em] text-accent">Trusted by builders</div>
-              <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
-                A small community, growing quietly.
-              </h2>
+      {/* LIVE TICKER */}
+      {statLine && statLine.some(([v]) => v !== "0") && (
+        <section className="relative bg-black/40 py-5 backdrop-blur sm:py-6">
+          {/* Mobile: marquee */}
+          <div
+            className="group relative overflow-hidden sm:hidden"
+            style={{
+              maskImage:
+                "linear-gradient(90deg, transparent, black 12%, black 88%, transparent)",
+              WebkitMaskImage:
+                "linear-gradient(90deg, transparent, black 12%, black 88%, transparent)",
+            }}
+          >
+            <div className="flex w-max animate-marquee gap-10 pr-10">
+              {[...statLine, ...statLine].map(([v, l], i) => (
+                <div key={i} className="flex shrink-0 items-baseline gap-2">
+                  <span className="bg-gradient-to-b from-white to-white/60 bg-clip-text text-xl font-semibold tabular-nums text-transparent">
+                    {v}
+                  </span>
+                  <span className="font-mono text-[9px] uppercase tracking-[0.18em] text-muted">
+                    {l}
+                  </span>
+                </div>
+              ))}
             </div>
-            <StatsHover
-              items={[
-                { label: "Accounts", value: fmt(stats.users) },
-                { label: "Sites registered", value: fmt(stats.sites) },
-                { label: "Push subscribers", value: fmt(stats.subscribers) },
-                { label: "Notifications delivered", value: fmt(stats.delivered) },
-              ]}
-            />
+          </div>
+
+          {/* ≥sm: static row */}
+          <div className="mx-auto hidden max-w-6xl flex-wrap items-baseline justify-center gap-x-10 gap-y-3 px-6 text-center sm:flex">
+            {statLine.map(([v, l]) => (
+              <div key={l} className="flex items-baseline justify-center gap-2">
+                <span className="bg-gradient-to-b from-white to-white/60 bg-clip-text text-3xl font-semibold tabular-nums text-transparent">
+                  {v}
+                </span>
+                <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted">
+                  {l}
+                </span>
+              </div>
+            ))}
           </div>
         </section>
       )}
 
-      {/* SNIPPET */}
-      <section className="relative border-t border-border/50 py-24">
-        <div className="mx-auto max-w-4xl px-6 text-center">
-          <div className="mb-3 text-xs uppercase tracking-[0.2em] text-accent">Install in seconds</div>
-          <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-            One file. One script tag.
-          </h2>
-          <p className="mx-auto mt-3 max-w-lg text-sm text-muted">
-            Drop <code className="text-white">layla-sw.js</code> at the root of your site, then paste the
-            snippet before <code className="text-white">&lt;/body&gt;</code>. That&apos;s it.
-          </p>
-          <div className="mt-10">
-            <SnippetPreview />
-          </div>
-        </div>
-      </section>
-
-      {/* WORKFLOW */}
-      <section className="relative border-t border-border/50 py-24">
-        <div className="mx-auto max-w-6xl px-6">
-          <div className="mb-10 text-center">
-            <div className="mb-3 text-xs uppercase tracking-[0.2em] text-accent">How it works</div>
-            <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-              Three steps from install to sent.
+      {/* INSTALL */}
+      <section className="relative py-20 sm:py-28">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6">
+          <div className="mb-10 text-center sm:mb-14">
+            <div className="mb-3 font-mono text-[10px] uppercase tracking-[0.28em] text-accent">
+              Install
+            </div>
+            <h2 className="text-2xl font-semibold tracking-tight sm:text-5xl">
+              Three steps.{" "}
+              <span className="block text-muted sm:inline">First push in 60 seconds.</span>
             </h2>
           </div>
-          <Workflow />
+          <InstallReel />
         </div>
       </section>
 
       {/* PRIVACY BENTO */}
-      <section className="relative border-t border-border/50 py-24">
-        <div className="mx-auto max-w-6xl px-6">
-          <div className="mb-10 text-center">
-            <div className="mb-3 text-xs uppercase tracking-[0.2em] text-accent">Privacy by default</div>
-            <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">
+      <section className="relative py-20 sm:py-28">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6">
+          <div className="mb-10 text-center sm:mb-14">
+            <div className="mb-3 font-mono text-[10px] uppercase tracking-[0.28em] text-accent">
+              Privacy by default
+            </div>
+            <h2 className="text-3xl font-semibold leading-[1.05] tracking-tight sm:text-5xl">
               We don&apos;t know who you are.
               <br />
               <span className="text-muted">And we like it that way.</span>
@@ -197,7 +209,7 @@ export default async function Home() {
               description="Your account is a 16-digit code. Nothing to leak, nothing to sell."
               header={
                 <div className="flex h-32 items-center justify-center rounded-lg bg-gradient-to-br from-accent/40 to-transparent">
-                  <div className="rounded-md border border-border bg-black px-4 py-2 font-mono text-lg tracking-widest">
+                  <div className="rounded-md border border-border bg-black px-3 py-2 font-mono text-sm tracking-widest sm:px-4 sm:text-lg">
                     XXXX-XXXX-XXXX-XXXX
                   </div>
                 </div>
@@ -241,39 +253,46 @@ export default async function Home() {
       </section>
 
       {/* CTA */}
-      <section className="relative border-t border-border/50 py-24">
-        <div className="mx-auto max-w-3xl px-6 text-center">
-          <h2 className="text-4xl font-semibold tracking-tight sm:text-5xl">
-            Start sending in <span className="text-accent">under a minute.</span>
+      <section className="relative overflow-hidden py-24 sm:py-32">
+        <div className="relative mx-auto max-w-3xl px-4 text-center sm:px-6">
+          <h2 className="text-3xl font-semibold leading-[1.05] tracking-tight sm:text-6xl">
+            Ship a push before
+            <br />
+            <span className="italic text-accent">your coffee&apos;s cold.</span>
           </h2>
-          <p className="mx-auto mt-4 max-w-lg text-muted">
-            Generate a code, paste the snippet, send your first push. No credit card, no email confirmation, no BS.
-          </p>
-          <Link
-            href="/auth?tab=signup"
-            className="mt-8 inline-block rounded-full bg-accent px-8 py-3.5 text-sm font-medium text-white shadow-[0_0_60px_rgba(93,10,209,0.5)] transition hover:bg-accent-hover"
-          >
-            Create your code →
-          </Link>
+          <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:mt-10 sm:flex-row">
+            <Link
+              href="/auth?tab=signup"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-white px-8 py-3.5 text-sm font-semibold text-black shadow-[0_0_60px_rgba(255,255,255,0.15)] transition hover:bg-white/90 sm:w-auto"
+            >
+              Generate my code
+              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" className="h-3.5 w-3.5">
+                <path d="M4 10h12M11 5l5 5-5 5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </Link>
+            <span className="font-mono text-[10px] text-muted sm:text-[11px]">no card · no email · &lt; 30s</span>
+          </div>
         </div>
       </section>
 
       {/* FOOTER */}
-      <footer className="border-t border-border/50 py-8">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 text-xs text-muted">
+      <footer className="py-6 sm:py-8">
+        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-4 text-xs text-muted sm:flex-row sm:px-6">
           <div className="flex items-center gap-2">
             <Image src="/logo.png" alt="" width={16} height={16} />
             <span>Layla — layla.wtf</span>
           </div>
-          <div>
-            Built with love by{" "}
+          <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
+            <Link href="/faq" className="hover:text-white">FAQ</Link>
+            <Link href="/tos" className="hover:text-white">Terms</Link>
+            <Link href="/about" className="hover:text-white">About</Link>
             <a
               href="https://github.com/rishabnotfound"
               target="_blank"
               rel="noreferrer"
-              className="text-white hover:text-accent"
+              className="hover:text-white"
             >
-              Rishab
+              by Rishab
             </a>
           </div>
         </div>
@@ -319,7 +338,6 @@ function SelfHostVisual() {
         </div>
         <span className="text-[9px] uppercase tracking-widest text-muted">your VPS</span>
       </div>
-
       <div className="flex flex-1 flex-col items-center gap-1">
         <div className="flex w-full items-center">
           <span className="h-px flex-1 bg-gradient-to-r from-accent/80 to-transparent" />
@@ -328,7 +346,6 @@ function SelfHostVisual() {
         </div>
         <span className="text-[9px] uppercase tracking-widest text-muted">no third party</span>
       </div>
-
       <div className="flex flex-col items-center gap-1">
         <div className="flex h-9 w-9 items-center justify-center rounded-md border border-border bg-black text-accent">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="h-4 w-4">

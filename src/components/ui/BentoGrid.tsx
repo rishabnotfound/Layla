@@ -25,7 +25,7 @@ export function BentoCard({
   return (
     <div
       className={cn(
-        "group/bento relative row-span-1 flex flex-col justify-between space-y-3 overflow-hidden rounded-xl border border-border bg-panel p-5 transition duration-300 hover:border-accent",
+        "group/bento relative row-span-1 flex flex-col justify-between space-y-3 overflow-hidden rounded-2xl border border-border bg-panel/60 p-5 backdrop-blur transition duration-300 hover:border-accent",
         className
       )}
     >

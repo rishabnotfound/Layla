@@ -3,7 +3,27 @@ import Image from "next/image";
 
 export const metadata = {
   title: "Terms of Service — Layla",
+  description:
+    "Terms of service for Layla web push notifications: acceptable use, origin lock, account responsibility, and data handling.",
   alternates: { canonical: "/tos" },
+  openGraph: {
+    title: "Terms of Service — Layla",
+    description:
+      "Layla's terms of service: acceptable use, origin lock, and account handling.",
+    url: "https://layla.wtf/tos",
+    type: "article",
+  },
+};
+
+const SITE_URL = "https://layla.wtf";
+
+const breadcrumbJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
+    { "@type": "ListItem", position: 2, name: "Terms", item: `${SITE_URL}/tos` },
+  ],
 };
 
 const sections = [
@@ -64,7 +84,11 @@ const sections = [
 
 export default function TosPage() {
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen text-white">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
       <nav className="border-b border-border/50 bg-black/70 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-3">
           <Link href="/" className="flex items-center gap-2">
