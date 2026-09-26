@@ -169,6 +169,9 @@ const jsonLd = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
+      <head>
+        <meta name="darkreader-lock" />
+      </head>
       <body className="min-h-screen bg-bg text-white">
         <HeroBackground />
         <div className="relative z-10">{children}</div>
