@@ -5,14 +5,11 @@ import { useRef, useMemo } from "react";
 import { Canvas, useFrame, ThreeElements } from "@react-three/fiber";
 import * as THREE from "three";
 
-/* eslint-disable @typescript-eslint/no-namespace */
 declare module "react" {
   namespace JSX {
-    // eslint-disable-next-line @typescript-eslint/no-empty-object-type
     interface IntrinsicElements extends ThreeElements {}
   }
 }
-/* eslint-enable @typescript-eslint/no-namespace */
 
 const vertexShader = `
 varying vec2 vUv;
