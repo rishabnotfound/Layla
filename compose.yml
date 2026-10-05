@@ -8,21 +8,12 @@ services:
     build: .
     env_file: .env
     restart: unless-stopped
+    networks: [default, tbcpl]
     <<: *logging
   queue:
     build: .
     command: ["npm","run","queue"]
     env_file: .env
-    restart: unless-stopped
-    <<: *logging
-  caddy:
-    image: caddy:2-alpine
-    ports: ["80:80","443:443"]
-    volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile:ro
-      - caddy_data:/data
-      - caddy_config:/config
-    depends_on: [web]
     restart: unless-stopped
     <<: *logging
   prune:
@@ -31,6 +22,7 @@ services:
     volumes: [/var/run/docker.sock:/var/run/docker.sock]
     restart: unless-stopped
     <<: *logging
-volumes:
-  caddy_data:
-  caddy_config:
+networks:
+  tbcpl:
+    external: true
+    name: tbcpl_default
