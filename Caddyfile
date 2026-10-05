@@ -1,0 +1,7 @@
+www.layla.wtf {
+  redir https://layla.wtf{uri} permanent
+}
+
+layla.wtf {
+  reverse_proxy web:3001
+}
